@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slay the Spire 2 - 덱빌드 가이드</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-deep: #0a0a0f;
+            --bg-dark: #111118;
+            --bg-card: #16161f;
+            --text-primary: #e8e4d9;
+            --text-dim: #8a8678;
+            --text-muted: #5a5750;
+            --gold: #c9a84c;
+            --gold-bright: #f0d678;
+            --gold-dim: #8a7432;
+            --ironclad: #c4302b;
+            --ironclad-glow: #ff4444;
+            --silent: #3ea83e;
+            --silent-glow: #55ff55;
+            --regent: #b8943e;
+            --regent-glow: #e8c456;
+            --necrobinder: #8844bb;
+            --necrobinder-glow: #bb66ff;
+            --defect: #4488cc;
+            --defect-glow: #55aaff;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Atmospheric Background */
+        .bg-atmosphere {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .bg-atmosphere::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(138, 116, 50, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(136, 68, 187, 0.04) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(68, 136, 204, 0.03) 0%, transparent 60%);
+            animation: atmosphereShift 25s ease-in-out infinite alternate;
+        }
+
+        @keyframes atmosphereShift {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(-3%, -2%) rotate(3deg); }
+        }
+
+        /* Floating Particles */
+        .particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            animation: floatParticle linear infinite;
+            opacity: 0;
+        }
+
+        @keyframes floatParticle {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+
+        /* Scan Line overlay */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.03) 2px,
+                rgba(0, 0, 0, 0.03) 4px
+            );
+        }
+
+        /* Vignette */
+        .vignette {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+            background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.6) 100%);
+        }
+
+        /* Main Content */
+        .content {
+            position: relative;
+            z-index: 10;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 24px 80px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeInDown 1.2s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            0% { opacity: 0; transform: translateY(-40px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .header-ornament {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            opacity: 0;
+            animation: fadeIn 1s ease-out 0.3s forwards;
+        }
+
+        .ornament-line {
+            width: 80px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+        }
+
+        .ornament-diamond {
+            width: 8px;
+            height: 8px;
+            background: var(--gold);
+            transform: rotate(45deg);
+            box-shadow: 0 0 10px rgba(201, 168, 76, 0.5);
+        }
+
+        .title {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 900;
+            color: var(--gold);
+            text-shadow: 
+                0 0 20px rgba(201, 168, 76, 0.3),
+                0 0 60px rgba(201, 168, 76, 0.1),
+                0 2px 4px rgba(0, 0, 0, 0.8);
+            letter-spacing: 3px;
+            line-height: 1.3;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1rem, 2.5vw, 1.3rem);
+            color: var(--text-dim);
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            font-weight: 400;
+            opacity: 0;
+            animation: fadeIn 1s ease-out 0.6s forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        /* Notice Section */
+        .notice-section {
+            margin-bottom: 56px;
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out 0.8s forwards;
+        }
+
+        @keyframes fadeInUp {
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .notice-box {
+            position: relative;
+            background: linear-gradient(135deg, rgba(201, 168, 76, 0.05) 0%, rgba(22, 22, 31, 0.9) 100%);
+            border: 1px solid rgba(201, 168, 76, 0.15);
+            border-radius: 4px;
+            padding: 32px 36px;
+            overflow: hidden;
+        }
+
+        .notice-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--gold), var(--gold-dim), transparent);
+        }
+
+        .notice-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.05rem;
+            color: var(--gold);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notice-title::before {
+            content: '\25C8';
+            font-size: 0.8rem;
+        }
+
+        .notice-text {
+            font-size: 0.92rem;
+            line-height: 1.85;
+            color: var(--text-dim);
+            font-weight: 300;
+        }
+
+        .notice-text strong {
+            color: var(--gold-bright);
+            font-weight: 500;
+        }
+
+        .notice-text .hl {
+            color: var(--text-primary);
+            font-weight: 400;
+        }
+
+        .notice-warn {
+            display: inline-block;
+            margin-top: 16px;
+            padding: 10px 18px;
+            background: rgba(201, 168, 76, 0.06);
+            border: 1px solid rgba(201, 168, 76, 0.12);
+            border-radius: 3px;
+            font-size: 0.88rem;
+            color: var(--gold);
+            font-weight: 500;
+        }
+
+        /* Characters */
+        .characters-section {
+            margin-bottom: 56px;
+        }
+
+        .section-label {
+            font-family: 'Cinzel', serif;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            text-align: center;
+            margin-bottom: 36px;
+            opacity: 0;
+            animation: fadeIn 0.8s ease-out 1s forwards;
+        }
+
+        .characters-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Character Card */
+        .char-card {
+            position: relative;
+            display: block;
+            text-decoration: none;
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 4px;
+            padding: 28px 32px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+
+        .char-card:nth-child(1) { animation: slideInCard 0.6s ease-out 1.1s forwards; }
+        .char-card:nth-child(2) { animation: slideInCard 0.6s ease-out 1.25s forwards; }
+        .char-card:nth-child(3) { animation: slideInCard 0.6s ease-out 1.4s forwards; }
+        .char-card:nth-child(4) { animation: slideInCard 0.6s ease-out 1.55s forwards; }
+        .char-card:nth-child(5) { animation: slideInCard 0.6s ease-out 1.7s forwards; }
+
+        @keyframes slideInCard {
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .char-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            transition: all 0.4s ease;
+        }
+
+        .char-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        .char-card:hover {
+            transform: translateX(8px);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .char-card:hover::after {
+            opacity: 1;
+        }
+
+        .char-card:hover .char-arrow {
+            transform: translateX(6px);
+            opacity: 1;
+        }
+
+        .char-card:hover .char-icon {
+            transform: scale(1.15);
+        }
+
+        /* Per-character colors */
+        .char-card.ironclad::before { background: linear-gradient(180deg, var(--ironclad), transparent); }
+        .char-card.ironclad::after { background: radial-gradient(ellipse at left center, rgba(196, 48, 43, 0.08) 0%, transparent 60%); }
+        .char-card.ironclad:hover { border-color: rgba(196, 48, 43, 0.25); box-shadow: 0 0 50px rgba(196, 48, 43, 0.08); }
+        .char-card.ironclad .char-icon { color: var(--ironclad); }
+        .char-card.ironclad .char-name { color: var(--ironclad-glow); }
+
+        .char-card.silent::before { background: linear-gradient(180deg, var(--silent), transparent); }
+        .char-card.silent::after { background: radial-gradient(ellipse at left center, rgba(62, 168, 62, 0.08) 0%, transparent 60%); }
+        .char-card.silent:hover { border-color: rgba(62, 168, 62, 0.25); box-shadow: 0 0 50px rgba(62, 168, 62, 0.08); }
+        .char-card.silent .char-icon { color: var(--silent); }
+        .char-card.silent .char-name { color: var(--silent-glow); }
+
+        .char-card.regent::before { background: linear-gradient(180deg, var(--regent), transparent); }
+        .char-card.regent::after { background: radial-gradient(ellipse at left center, rgba(184, 148, 62, 0.08) 0%, transparent 60%); }
+        .char-card.regent:hover { border-color: rgba(184, 148, 62, 0.25); box-shadow: 0 0 50px rgba(184, 148, 62, 0.08); }
+        .char-card.regent .char-icon { color: var(--regent); }
+        .char-card.regent .char-name { color: var(--regent-glow); }
+
+        .char-card.necrobinder::before { background: linear-gradient(180deg, var(--necrobinder), transparent); }
+        .char-card.necrobinder::after { background: radial-gradient(ellipse at left center, rgba(136, 68, 187, 0.08) 0%, transparent 60%); }
+        .char-card.necrobinder:hover { border-color: rgba(136, 68, 187, 0.25); box-shadow: 0 0 50px rgba(136, 68, 187, 0.08); }
+        .char-card.necrobinder .char-icon { color: var(--necrobinder); }
+        .char-card.necrobinder .char-name { color: var(--necrobinder-glow); }
+
+        .char-card.defect::before { background: linear-gradient(180deg, var(--defect), transparent); }
+        .char-card.defect::after { background: radial-gradient(ellipse at left center, rgba(68, 136, 204, 0.08) 0%, transparent 60%); }
+        .char-card.defect:hover { border-color: rgba(68, 136, 204, 0.25); box-shadow: 0 0 50px rgba(68, 136, 204, 0.08); }
+        .char-card.defect .char-icon { color: var(--defect); }
+        .char-card.defect .char-name { color: var(--defect-glow); }
+
+        .char-card-inner {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .char-icon {
+            font-size: 1.8rem;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.4s ease;
+        }
+
+        .char-info { flex: 1; }
+
+        .char-name {
+            font-family: 'Cinzel', serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .char-desc {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        .char-arrow {
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            opacity: 0.3;
+            transition: all 0.4s ease;
+            flex-shrink: 0;
+        }
+
+        /* Shimmer effect on hover */
+        .shimmer {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.02), transparent);
+        }
+
+        .char-card:hover .shimmer {
+            animation: shimmerSlide 0.8s ease-out;
+        }
+
+        @keyframes shimmerSlide {
+            to { left: 200%; }
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding-top: 40px;
+            border-top: 1px solid rgba(201, 168, 76, 0.08);
+            opacity: 0;
+            animation: fadeIn 0.8s ease-out 2s forwards;
+        }
+
+        .footer-ornament {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .footer-ornament .ornament-line { width: 40px; }
+        .footer-ornament .ornament-diamond { width: 5px; height: 5px; }
+
+        .footer-credit {
+            font-family: 'Cinzel', serif;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        .footer-credit span { color: var(--gold-dim); }
+
+        .footer-sub {
+            font-size: 0.72rem;
+            color: rgba(138, 134, 120, 0.4);
+            margin-top: 10px;
+            letter-spacing: 1px;
+        }
+
+        /* Glow ring on load */
+        .glow-ring {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            border: 1px solid rgba(201, 168, 76, 0.3);
+            transform: translate(-50%, -50%);
+            animation: glowRingExpand 2s ease-out 0.2s forwards;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        @keyframes glowRingExpand {
+            0% { width: 0; height: 0; opacity: 1; }
+            100% { width: 200vmax; height: 200vmax; opacity: 0; }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .content { padding: 40px 16px 60px; }
+            .char-card { padding: 22px 20px; }
+            .char-icon { width: 40px; height: 40px; font-size: 1.4rem; }
+            .char-name { font-size: 1rem; }
+            .notice-box { padding: 24px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-atmosphere"></div>
+    <div class="particles-container" id="particles"></div>
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
+    <div class="glow-ring"></div>
+
+    <div class="content">
+        <header class="header">
+            <div class="header-ornament">
+                <div class="ornament-line"></div>
+                <div class="ornament-diamond"></div>
+                <div class="ornament-line"></div>
+            </div>
+            <h1 class="title">Slay the Spire 2</h1>
+            <p class="subtitle">Deck Build Guide</p>
+        </header>
+
+        <section class="notice-section">
+            <div class="notice-box">
+                <h2 class="notice-title">안내 사항</h2>
+                <p class="notice-text">
+                    본 페이지는 <strong>Slay the Spire 2</strong>의 캐릭터별 <span class="hl">덱빌드 추천 가이드</span>를 제공합니다.
+                    아래 버튼을 통해 각 캐릭터의 덱빌드 가이드 페이지로 이동할 수 있습니다.
+                    <br><br>
+                    현재 게임이 <strong>얼리 액세스</strong> 단계이므로, 일부 카드나 유물의 이름이 정확하지 않을 수 있으며
+                    향후 밸런스 패치에 따라 빌드 구성이 변경될 수 있습니다.
+                    <br><br>
+                    여기에 나열된 빌드 외에도 다양한 조합이 가능합니다.
+                    <span class="hl">직접 연구하며 플레이하는 것을 적극 권장합니다.</span>
+                </p>
+                <span class="notice-warn">추천된 덱빌드가 만능은 절대 아닙니다. 상황에 따른 최종 판단은 플레이어 본인의 몫입니다.</span>
+            </div>
+        </section>
+
+        <section class="characters-section">
+            <p class="section-label">캐릭터 선택</p>
+            <div class="characters-grid">
+                <a href="https://nogonergade.github.io/slaythespire2/ironclad-guide" class="char-card ironclad">
+                    <div class="shimmer"></div>
+                    <div class="char-card-inner">
+                        <div class="char-icon">&#9876;</div>
+                        <div class="char-info">
+                            <div class="char-name">IRONCLAD</div>
+                            <div class="char-desc">아이언클래드 덱빌드 추천 가이드로 이동합니다</div>
+                        </div>
+                        <div class="char-arrow">&rarr;</div>
+                    </div>
+                </a>
+
+                <a href="https://nogonergade.github.io/slaythespire2/silent-guide" class="char-card silent">
+                    <div class="shimmer"></div>
+                    <div class="char-card-inner">
+                        <div class="char-icon">&#128481;</div>
+                        <div class="char-info">
+                            <div class="char-name">SILENT</div>
+                            <div class="char-desc">사일런트 덱빌드 추천 가이드로 이동합니다</div>
+                        </div>
+                        <div class="char-arrow">&rarr;</div>
+                    </div>
+                </a>
+
+                <a href="https://nogonergade.github.io/slaythespire2/regent-guide" class="char-card regent">
+                    <div class="shimmer"></div>
+                    <div class="char-card-inner">
+                        <div class="char-icon">&#128081;</div>
+                        <div class="char-info">
+                            <div class="char-name">REGENT</div>
+                            <div class="char-desc">리젠트 덱빌드 추천 가이드로 이동합니다</div>
+                        </div>
+                        <div class="char-arrow">&rarr;</div>
+                    </div>
+                </a>
+
+                <a href="https://nogonergade.github.io/slaythespire2/necrobinder-guide" class="char-card necrobinder">
+                    <div class="shimmer"></div>
+                    <div class="char-card-inner">
+                        <div class="char-icon">&#128128;</div>
+                        <div class="char-info">
+                            <div class="char-name">NECROBINDER</div>
+                            <div class="char-desc">네크로바인더 덱빌드 추천 가이드로 이동합니다</div>
+                        </div>
+                        <div class="char-arrow">&rarr;</div>
+                    </div>
+                </a>
+
+                <a href="https://nogonergade.github.io/slaythespire2/defect-guide" class="char-card defect">
+                    <div class="shimmer"></div>
+                    <div class="char-card-inner">
+                        <div class="char-icon">&#9889;</div>
+                        <div class="char-info">
+                            <div class="char-name">DEFECT</div>
+                            <div class="char-desc">디펙트 덱빌드 추천 가이드로 이동합니다</div>
+                        </div>
+                        <div class="char-arrow">&rarr;</div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <div class="footer-ornament">
+                <div class="ornament-line"></div>
+                <div class="ornament-diamond"></div>
+                <div class="ornament-line"></div>
+            </div>
+            <p class="footer-credit">Made by <span>노곤</span></p>
+            <p class="footer-sub">Slay the Spire 2 is a game by Mega Crit Games</p>
+        </footer>
+    </div>
+
+    <script>
+        // Floating particles
+        const container = document.getElementById('particles');
+        const colors = [
+            'rgba(201, 168, 76, 0.4)',
+            'rgba(201, 168, 76, 0.2)',
+            'rgba(136, 68, 187, 0.3)',
+            'rgba(68, 136, 204, 0.2)',
+            'rgba(196, 48, 43, 0.2)',
+            'rgba(62, 168, 62, 0.2)',
+        ];
+
+        function createParticle() {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            const size = Math.random() * 3 + 1;
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            const duration = Math.random() * 15 + 12;
+            const delay = Math.random() * 10;
+            const left = Math.random() * 100;
+
+            p.style.width = size + 'px';
+            p.style.height = size + 'px';
+            p.style.left = left + '%';
+            p.style.background = color;
+            p.style.boxShadow = '0 0 ' + (size * 3) + 'px ' + color;
+            p.style.animationDuration = duration + 's';
+            p.style.animationDelay = delay + 's';
+
+            container.appendChild(p);
+
+            setTimeout(function() {
+                p.remove();
+                createParticle();
+            }, (duration + delay) * 1000);
+        }
+
+        for (var i = 0; i < 30; i++) {
+            createParticle();
+        }
+    </script>
+</body>
+</html>
