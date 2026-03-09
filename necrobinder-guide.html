@@ -52,8 +52,9 @@ body::before {
 }
 
 .container {
-  max-width: 900px;
+  max-width: 860px;
   margin: 0 auto;
+  margin-right: max(calc((100vw - 860px) / 2), 80px);
   padding: 0 24px;
   position: relative;
   z-index: 1;
@@ -452,9 +453,132 @@ footer {
 
 footer a { color: var(--accent-purple); text-decoration: none; }
 
+/* ── Fixed Sidebar Nav ── */
+.side-nav {
+  position: fixed;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.side-nav a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: rgba(18,17,26,0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid transparent;
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.side-nav a:hover {
+  background: rgba(30,28,45,0.95);
+  border-color: var(--border-dim);
+}
+
+.side-nav a.active {
+  background: rgba(155,109,255,0.12);
+  border-color: var(--accent-purple);
+}
+
+.side-nav .nav-icon {
+  font-size: 1rem;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.side-nav .nav-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-dim);
+  white-space: nowrap;
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-width 0.3s ease, opacity 0.25s ease, color 0.25s ease;
+}
+
+.side-nav:hover .nav-label {
+  max-width: 160px;
+  opacity: 1;
+}
+
+.side-nav a.active .nav-label {
+  color: var(--accent-purple);
+}
+
+.side-nav a:hover .nav-label {
+  color: var(--text-bright);
+}
+
+.side-nav .nav-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  flex-shrink: 0;
+  transition: all 0.25s;
+}
+
+.side-nav a.active .nav-dot {
+  background: var(--accent-purple);
+  box-shadow: 0 0 8px rgba(155,109,255,0.5);
+  width: 8px;
+  height: 8px;
+}
+
 /* ── Responsive ── */
+@media (max-width: 1200px) {
+  .side-nav .nav-label { display: none; }
+  .side-nav a { padding: 8px 10px; }
+  .container { margin-right: auto; max-width: 900px; }
+}
+
+@media (max-width: 768px) {
+  .side-nav {
+    position: fixed;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    transform: none;
+    flex-direction: row;
+    justify-content: center;
+    gap: 0;
+    background: rgba(10,10,15,0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid var(--border-dim);
+    padding: 6px 4px;
+    overflow-x: auto;
+  }
+  .side-nav a {
+    padding: 8px 10px;
+    border-radius: 6px;
+    flex-direction: column;
+    gap: 2px;
+    background: transparent;
+    border: none;
+  }
+  .side-nav a.active { background: rgba(155,109,255,0.12); }
+  .side-nav .nav-label { display: none; }
+  .side-nav .nav-dot { display: none; }
+  .side-nav .nav-icon { font-size: 0.9rem; }
+  body { padding-bottom: 56px; }
+}
+
 @media (max-width: 640px) {
-  .container { padding: 0 16px; }
+  .container { padding: 0 16px; margin-right: auto; }
   header { padding: 48px 0 32px; }
   nav.toc ul { grid-template-columns: 1fr; }
   .concept-grid { grid-template-columns: 1fr; }
@@ -982,5 +1106,111 @@ footer a { color: var(--accent-purple); text-decoration: none; }
 </footer>
 
 </div>
+<!-- ════ FIXED SIDEBAR NAV ════ -->
+<nav class="side-nav" id="sideNav">
+  <a href="#concepts" data-section="concepts">
+    <span class="nav-icon">📖</span>
+    <span class="nav-label">기본 개념</span>
+    <span class="nav-dot"></span>
+  </a>
+  <a href="#build1" data-section="build1">
+    <span class="nav-icon">🦴</span>
+    <span class="nav-label">골골이 탱커딜러</span>
+    <span class="nav-dot"></span>
+  </a>
+  <a href="#build2" data-section="build2">
+    <span class="nav-icon">💀</span>
+    <span class="nav-label">종말 처형자</span>
+    <span class="nav-dot"></span>
+  </a>
+  <a href="#build3" data-section="build3">
+    <span class="nav-icon">👻</span>
+    <span class="nav-label">영혼 기관총</span>
+    <span class="nav-dot"></span>
+  </a>
+  <a href="#build4" data-section="build4">
+    <span class="nav-icon">💣</span>
+    <span class="nav-label">살점 재주 폭탄</span>
+    <span class="nav-dot"></span>
+  </a>
+  <a href="#build5" data-section="build5">
+    <span class="nav-icon">🔪</span>
+    <span class="nav-label">사신의 낫</span>
+    <span class="nav-dot"></span>
+  </a>
+  <a href="#build6" data-section="build6">
+    <span class="nav-icon">🌀</span>
+    <span class="nav-label">휘발성 폭풍</span>
+    <span class="nav-dot"></span>
+  </a>
+  <a href="#build7" data-section="build7">
+    <span class="nav-icon">⚡</span>
+    <span class="nav-label">망각+영혼 하이브리드</span>
+    <span class="nav-dot"></span>
+  </a>
+  <a href="#colorless" data-section="colorless">
+    <span class="nav-icon">🃏</span>
+    <span class="nav-label">무색 카드</span>
+    <span class="nav-dot"></span>
+  </a>
+  <a href="#tips" data-section="tips">
+    <span class="nav-icon">💡</span>
+    <span class="nav-label">운영 팁</span>
+    <span class="nav-dot"></span>
+  </a>
+</nav>
+
+<script>
+(function() {
+  const navLinks = document.querySelectorAll('.side-nav a[data-section]');
+  const sections = [];
+
+  navLinks.forEach(link => {
+    const id = link.getAttribute('data-section');
+    const el = document.getElementById(id);
+    if (el) sections.push({ id, el, link });
+  });
+
+  // Smooth scroll
+  navLinks.forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const id = link.getAttribute('data-section');
+      const target = document.getElementById(id);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.replaceState(null, '', '#' + id);
+      }
+    });
+  });
+
+  // Scroll spy
+  let ticking = false;
+  function updateActive() {
+    const scrollY = window.scrollY + 120;
+    let current = sections[0];
+
+    for (const s of sections) {
+      if (s.el.offsetTop <= scrollY) {
+        current = s;
+      }
+    }
+
+    navLinks.forEach(l => l.classList.remove('active'));
+    if (current) current.link.classList.add('active');
+    ticking = false;
+  }
+
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(updateActive);
+      ticking = true;
+    }
+  });
+
+  updateActive();
+})();
+</script>
+
 </body>
 </html>
