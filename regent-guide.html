@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>리젠트 덱 빌딩 가이드 — Slay the Spire 2</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Cinzel:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep: #0c0a06;
+  --bg-card: #161208;
+  --bg-card-hover: #1e1a10;
+  --border-dim: #3a3018;
+  --border-glow: #c8963e;
+  --accent-brass: #c8963e;
+  --accent-bronze: #d4a84b;
+  --accent-gold: #e8c872;
+  --accent-darkgold: #a07828;
+  --accent-cyan: #4ecdc4;
+  --accent-green: #50c878;
+  --accent-blue: #5090e0;
+  --accent-purple: #a080d0;
+  --text-bright: #f0ece0;
+  --text-mid: #b0a890;
+  --text-dim: #807050;
+  --star-color: #5ec4f0;
+  --forge-color: #e08040;
+  --blade-color: #e04040;
+  --block-color: #5090e0;
+  --minion-color: #c0a040;
+  --debuff-color: #c080e0;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg-deep);
+  color: var(--text-bright);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-weight: 400;
+  line-height: 1.7;
+  min-height: 100vh;
+}
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(200,150,62,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(212,168,75,0.04) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+.container {
+  max-width: 860px;
+  margin: 0 auto;
+  margin-right: max(calc((100vw - 860px) / 2), 80px);
+  padding: 0 24px;
+  position: relative;
+  z-index: 1;
+}
+header { text-align: center; padding: 80px 0 48px; }
+header::after {
+  content: '';
+  display: block;
+  width: 120px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-brass), transparent);
+  margin: 32px auto 0;
+}
+header h1 {
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  letter-spacing: 0.05em;
+  background: linear-gradient(135deg, var(--accent-brass), var(--accent-gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+header .subtitle {
+  font-size: 0.95rem;
+  color: var(--text-dim);
+  margin-top: 12px;
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+nav.toc {
+  background: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  border-radius: 12px;
+  padding: 24px 28px;
+  margin-bottom: 48px;
+}
+nav.toc h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-dim); margin-bottom: 16px; }
+nav.toc ul { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+nav.toc a { color: var(--text-mid); text-decoration: none; font-size: 0.9rem; padding: 6px 12px; border-radius: 6px; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
+nav.toc a:hover { color: var(--text-bright); background: rgba(200,150,62,0.08); }
+nav.toc .diff { font-size: 0.7rem; letter-spacing: 1px; }
+.concepts { background: var(--bg-card); border: 1px solid var(--border-dim); border-radius: 12px; padding: 28px; margin-bottom: 48px; }
+.concepts h2 { font-family: 'Cinzel', serif; font-size: 1.2rem; color: var(--accent-brass); margin-bottom: 16px; }
+.concept-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.concept-item { background: rgba(200,150,62,0.04); border: 1px solid rgba(200,150,62,0.1); border-radius: 8px; padding: 16px; }
+.concept-item .label { font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; }
+.concept-item .desc { font-size: 0.8rem; color: var(--text-mid); line-height: 1.5; }
+.build-section { margin-bottom: 56px; scroll-margin-top: 24px; }
+.build-header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 8px; flex-wrap: wrap; }
+.build-header h2 { font-family: 'Cinzel', serif; font-size: 1.5rem; font-weight: 700; }
+.build-header .build-num { font-family: 'Cinzel', serif; font-size: 0.8rem; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; }
+.diff-badge { font-size: 0.7rem; padding: 3px 10px; border-radius: 100px; letter-spacing: 0.05em; font-weight: 500; }
+.diff-easy { background: rgba(80,200,120,0.15); color: var(--accent-green); border: 1px solid rgba(80,200,120,0.25); }
+.diff-mid { background: rgba(240,192,64,0.12); color: var(--accent-gold); border: 1px solid rgba(240,192,64,0.2); }
+.diff-hard { background: rgba(160,128,208,0.12); color: var(--accent-purple); border: 1px solid rgba(160,128,208,0.2); }
+.build-desc { color: var(--text-mid); font-size: 0.9rem; margin-bottom: 20px; padding-left: 2px; }
+.card-group-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-dim); margin: 20px 0 10px; padding-left: 4px; }
+.card-list { display: flex; flex-direction: column; gap: 6px; }
+.card-item { display: grid; grid-template-columns: minmax(140px, auto) 1fr; gap: 12px; background: var(--bg-card); border: 1px solid var(--border-dim); border-radius: 8px; padding: 12px 16px; transition: border-color 0.2s, background 0.2s; align-items: baseline; }
+.card-item:hover { border-color: var(--border-glow); background: var(--bg-card-hover); }
+.card-name { font-weight: 700; font-size: 0.9rem; white-space: nowrap; }
+.card-name .en { font-weight: 300; font-size: 0.75rem; color: var(--text-dim); margin-left: 4px; }
+.card-desc { font-size: 0.85rem; color: var(--text-mid); line-height: 1.5; }
+.card-desc strong { color: var(--text-bright); font-weight: 500; }
+.tag { display: inline-block; font-size: 0.65rem; padding: 1px 6px; border-radius: 3px; font-weight: 500; vertical-align: middle; margin-left: 4px; }
+.tag-star { background: rgba(94,196,240,0.15); color: var(--star-color); }
+.tag-forge { background: rgba(224,128,64,0.15); color: var(--forge-color); }
+.tag-blade { background: rgba(224,64,64,0.15); color: var(--blade-color); }
+.tag-block { background: rgba(80,144,224,0.15); color: var(--block-color); }
+.tag-minion { background: rgba(192,160,64,0.15); color: var(--minion-color); }
+.tag-debuff { background: rgba(192,128,224,0.15); color: var(--debuff-color); }
+.tag-power { background: rgba(224,128,64,0.15); color: var(--forge-color); }
+.tag-rare { background: rgba(232,200,114,0.12); color: var(--accent-gold); }
+.tag-ancient { background: rgba(200,150,62,0.15); color: var(--accent-brass); }
+.tag-colorless { background: rgba(176,176,192,0.1); color: #b0b0c0; }
+.relic-box { background: rgba(232,200,114,0.04); border: 1px solid rgba(232,200,114,0.15); border-radius: 8px; padding: 14px 18px; margin-top: 14px; }
+.relic-box .relic-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent-gold); margin-bottom: 6px; }
+.relic-box .relic-item { font-size: 0.85rem; color: var(--text-mid); line-height: 1.6; }
+.relic-box .relic-item strong { color: var(--accent-gold); font-weight: 500; }
+.tip-box { background: rgba(78,205,196,0.05); border-left: 3px solid var(--accent-cyan); border-radius: 0 8px 8px 0; padding: 14px 18px; margin-top: 14px; font-size: 0.85rem; color: var(--text-mid); line-height: 1.6; }
+.tip-box strong { color: var(--accent-cyan); }
+.combo-box { background: rgba(200,150,62,0.05); border: 1px solid rgba(200,150,62,0.15); border-radius: 8px; padding: 18px; margin-top: 14px; }
+.combo-box .combo-title { font-size: 0.8rem; font-weight: 700; color: var(--accent-brass); margin-bottom: 8px; }
+.combo-box ol { padding-left: 20px; font-size: 0.85rem; color: var(--text-mid); line-height: 1.8; }
+.combo-box ol strong { color: var(--text-bright); }
+.colorless-section { margin-bottom: 56px; scroll-margin-top: 24px; }
+.colorless-section h2 { font-family: 'Cinzel', serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
+.colorless-section .section-desc { color: var(--text-mid); font-size: 0.9rem; margin-bottom: 20px; }
+.tips-section { background: var(--bg-card); border: 1px solid var(--border-dim); border-radius: 12px; padding: 28px; margin-bottom: 56px; scroll-margin-top: 24px; }
+.tips-section h2 { font-family: 'Cinzel', serif; font-size: 1.3rem; color: var(--accent-brass); margin-bottom: 16px; }
+.tips-section .tip-item { padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.9rem; color: var(--text-mid); line-height: 1.6; }
+.tips-section .tip-item:last-child { border-bottom: none; }
+.tips-section .tip-item strong { color: var(--text-bright); }
+.tips-section .tip-num { display: inline-block; width: 24px; height: 24px; line-height: 24px; text-align: center; background: rgba(200,150,62,0.15); color: var(--accent-brass); border-radius: 6px; font-size: 0.75rem; font-weight: 700; margin-right: 10px; }
+footer { text-align: center; padding: 48px 0; color: var(--text-dim); font-size: 0.75rem; letter-spacing: 0.05em; }
+footer a { color: var(--accent-brass); text-decoration: none; }
+
+/* ── Fixed Sidebar Nav ── */
+.side-nav { position: fixed; right: 20px; top: 50%; transform: translateY(-50%); z-index: 100; display: flex; flex-direction: column; gap: 2px; }
+.side-nav a { display: flex; align-items: center; gap: 10px; text-decoration: none; padding: 8px 14px; border-radius: 8px; background: rgba(22,18,8,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid transparent; transition: all 0.25s ease; }
+.side-nav a:hover { background: rgba(30,26,16,0.95); border-color: var(--border-dim); }
+.side-nav a.active { background: rgba(200,150,62,0.12); border-color: var(--accent-brass); }
+.side-nav .nav-icon { font-size: 1rem; width: 20px; text-align: center; flex-shrink: 0; }
+.side-nav .nav-label { font-size: 0.75rem; font-weight: 500; color: var(--text-dim); white-space: nowrap; max-width: 0; overflow: hidden; opacity: 0; transition: max-width 0.3s ease, opacity 0.25s ease, color 0.25s ease; }
+.side-nav:hover .nav-label { max-width: 160px; opacity: 1; }
+.side-nav a.active .nav-label { color: var(--accent-brass); }
+.side-nav a:hover .nav-label { color: var(--text-bright); }
+.side-nav .nav-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-dim); flex-shrink: 0; transition: all 0.25s; }
+.side-nav a.active .nav-dot { background: var(--accent-brass); box-shadow: 0 0 8px rgba(200,150,62,0.5); width: 8px; height: 8px; }
+
+@media (max-width: 1200px) {
+  .side-nav .nav-label { display: none; }
+  .side-nav a { padding: 8px 10px; }
+  .container { margin-right: auto; max-width: 900px; }
+}
+@media (max-width: 768px) {
+  .side-nav { position: fixed; right: 0; top: auto; bottom: 0; left: 0; transform: none; flex-direction: row; justify-content: center; gap: 0; background: rgba(12,10,6,0.95); backdrop-filter: blur(16px); border-top: 1px solid var(--border-dim); padding: 6px 4px; overflow-x: auto; }
+  .side-nav a { padding: 8px 10px; border-radius: 6px; flex-direction: column; gap: 2px; background: transparent; border: none; }
+  .side-nav a.active { background: rgba(200,150,62,0.12); }
+  .side-nav .nav-label { display: none; }
+  .side-nav .nav-dot { display: none; }
+  .side-nav .nav-icon { font-size: 0.9rem; }
+  body { padding-bottom: 56px; }
+}
+@media (max-width: 640px) {
+  .container { padding: 0 16px; margin-right: auto; }
+  header { padding: 48px 0 32px; }
+  nav.toc ul { grid-template-columns: 1fr; }
+  .concept-grid { grid-template-columns: 1fr; }
+  .card-item { grid-template-columns: 1fr; gap: 4px; }
+  .build-header { flex-direction: column; gap: 8px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>THE REGENT</h1>
+  <div class="subtitle">Slay the Spire 2 · 덱 빌딩 가이드</div>
+</header>
+
+<nav class="toc">
+  <h2>목차</h2>
+  <ul>
+    <li><a href="#concepts">📖 기본 개념</a></li>
+    <li><a href="#build1">⚔️ 빌드 1 — 군주의 칼날 단조 <span class="diff">★☆☆</span></a></li>
+    <li><a href="#build2">⭐ 빌드 2 — 별 스케일링 <span class="diff">★☆☆</span></a></li>
+    <li><a href="#build3">🌀 빌드 3 — 블랙홀 별 순환 <span class="diff">★★☆</span></a></li>
+    <li><a href="#build4">🌑 빌드 4 — 공허의 형상 컨트롤 <span class="diff">★★★</span></a></li>
+    <li><a href="#build5">👑 빌드 5 — 하수인 변환 <span class="diff">★★☆</span></a></li>
+    <li><a href="#build6">☄️ 빌드 6 — 혜성 폭격 <span class="diff">★★☆</span></a></li>
+    <li><a href="#build7">🗡️ 빌드 7 — 무기고 무색카드 <span class="diff">★★★</span></a></li>
+    <li><a href="#build8">🛡️ 빌드 8 — 입자 벽 루프 <span class="diff">★★☆</span></a></li>
+    <li><a href="#colorless">🃏 범용 무색 카드</a></li>
+    <li><a href="#tips">💡 초반 운영 팁</a></li>
+  </ul>
+</nav>
+
+<section class="concepts" id="concepts">
+  <h2>기본 개념</h2>
+  <div class="concept-grid">
+    <div class="concept-item">
+      <div class="label" style="color:var(--star-color)">⭐ 별 (Star)</div>
+      <div class="desc">에너지와 별개인 <strong>제2 자원</strong>. 턴이 끝나도 사라지지 않고 무한히 축적 가능. 강력한 카드들이 별 비용을 요구. 신성한 빛으로 전투 시작 시 별 3개.</div>
+    </div>
+    <div class="concept-item">
+      <div class="label" style="color:var(--forge-color)">🔨 단조 (Forge)</div>
+      <div class="desc"><strong>군주의 칼날</strong>의 피해를 영구 증가시키는 키워드. 첫 단조 시 칼날이 손에 추가됨. 칼날은 보존되어 매 턴 유지. 전투 내내 강화 누적.</div>
+    </div>
+    <div class="concept-item">
+      <div class="label" style="color:var(--minion-color)">👑 하수인 (Minion)</div>
+      <div class="desc">카드를 0코스트 하수인 카드로 변환하는 메카닉. <strong>돌격!!!!</strong>, <strong>막아라!!</strong> 등으로 기존 카드를 하수인 투하/희생으로 변화시켜 사용.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ BUILD 1: SOVEREIGN BLADE FORGE ════ -->
+<section class="build-section" id="build1">
+  <div class="build-header">
+    <span class="build-num">Build 01</span>
+    <h2 style="color:var(--forge-color)">군주의 칼날 단조</h2>
+    <span class="diff-badge diff-easy">★☆☆ 입문</span>
+  </div>
+  <div class="build-desc">단조로 군주의 칼날 피해를 누적시키고 한 방에 적을 날리는 가장 직관적인 빌드. 칼날은 보존(Retain)이라 손에 계속 남아있으니 충분히 강화된 후 사용. 리젠트의 가장 대표적인 아키타입.</div>
+
+  <div class="card-group-title">단조 카드 (칼날 강화)</div>
+  <div class="card-list">
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">위대한 재련</span> <span class="en">The Smith</span> <span class="tag tag-rare">레어</span></div>
+      <div class="card-desc">1코 별4. <strong>단조 30</strong>. 한 장으로 칼날에 30뎀 추가. 강화 시 40. 이 빌드의 핵심 윈컨</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--forge-color)">전장의 생존자</span> <span class="en">Wrought in War</span> <span class="tag tag-forge">단조</span></div>
+      <div class="card-desc">1코 7뎀 + <strong>단조 5</strong>. 딜+단조 동시. 기본 타격 대체용으로 최적</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--forge-color)">전투의 성과</span> <span class="en">Spoils of Battle</span> <span class="tag tag-forge">단조</span></div>
+      <div class="card-desc">1코 <strong>단조 10</strong>. 순수 단조 카드. 강화 시 15. 안정적인 칼날 성장</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--forge-color)">보루</span> <span class="en">Bulwark</span> <span class="tag tag-forge">고급</span></div>
+      <div class="card-desc">2코 방어도 13 + <strong>단조 10</strong>. 방어+단조 동시. 이 빌드의 방어 핵심</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--forge-color)">검날 개선</span> <span class="en">Refine Blade</span> <span class="tag tag-forge">단조</span></div>
+      <div class="card-desc">1코 단조 6 + 다음 턴 에너지 1 환급. 실질 0코스트 단조</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--forge-color)">재성형</span> <span class="en">Beat into Shape</span> <span class="tag tag-rare">레어</span></div>
+      <div class="card-desc">1코 5뎀 + 단조 5 + <strong>이번 턴 적 공격 횟수당 추가 단조 5</strong>. 콤보 턴에 단조 15~25 가능</div>
+    </div>
+  </div>
+
+  <div class="card-group-title">칼날 활용 & 서포트</div>
+  <div class="card-list">
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">앞으로 오라</span> <span class="en">Summon Forth</span> <span class="tag tag-forge">고급</span></div>
+      <div class="card-desc">1코 단조 8 + <strong>어디에 있든 군주의 칼날을 손으로</strong>. 칼날을 반복 사용 가능하게 해주는 핵심</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">정복자</span> <span class="en">Conqueror</span> <span class="tag tag-forge">고급</span></div>
+      <div class="card-desc">1코 단조 3 + <strong>이번 턴 칼날 피해 2배</strong>. 칼날 80뎀이면 160뎀. 피니셔</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">검성</span> <span class="en">Sword Sage</span> <span class="tag tag-rare">레어 파워</span></div>
+      <div class="card-desc">칼날 비용 +1 대신 <strong>1번 추가 적중</strong>. 칼날 100뎀이면 200뎀. 미쳐.</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">날 세우기</span> <span class="en">Seeking Edge</span> <span class="tag tag-rare">레어 파워</span></div>
+      <div class="card-desc">단조 7 + <strong>칼날이 이제 모든 적 대상</strong>. 넓은 전투 해결. 칼날 AoE화</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--forge-color)">용광로</span> <span class="en">Furnace</span> <span class="tag tag-power">파워</span></div>
+      <div class="card-desc">1코 파워. 매 턴 <strong>단조 4</strong> 자동. 깔아두면 턴마다 칼날이 알아서 성장</div>
+    </div>
+  </div>
+
+  <div class="combo-box">
+    <div class="combo-title">이상적인 턴 (에너지 3 기준)</div>
+    <ol>
+      <li><strong>용광로</strong> 설치 후 매 턴 자동 단조 4 누적</li>
+      <li><strong>보루</strong> → 방어도 13 + 단조 10 (칼날 +10)</li>
+      <li><strong>위대한 재련</strong> → 단조 30 (칼날 +30)</li>
+      <li>충분히 쌓인 후 <strong>정복자</strong> → 칼날 피해 2배 → <strong>군주의 칼날</strong>로 100+뎀 한 방</li>
+    </ol>
+  </div>
+
+  <div class="relic-box">
+    <div class="relic-title">추천 유물</div>
+    <div class="relic-item"><strong>검술 안내서</strong> — 매 전투 시작 시 단조 10. 칼날이 바로 쓸만해짐</div>
+    <div class="relic-item"><strong>금강저</strong> — 매 전투 시작 시 힘 +1. 칼날 피해에 직접 추가</div>
+    <div class="relic-item"><strong>울퉁불퉁한 망치</strong> — 공격 카드에 예리 3 인챈트. 칼날 포함</div>
+  </div>
+</section>
+
+<!-- ════ BUILD 2: STAR SCALING ════ -->
+<section class="build-section" id="build2">
+  <div class="build-header">
+    <span class="build-num">Build 02</span>
+    <h2 style="color:var(--star-color)">별 스케일링</h2>
+    <span class="diff-badge diff-easy">★☆☆ 입문</span>
+  </div>
+  <div class="build-desc">별을 안정적으로 생성하고, 별 비용 카드로 강력한 공격/디버프를 터뜨리는 빌드. 창세로 별 자동 수급하고 일곱 개의 별/혜성 같은 고별 카드로 폭딜. 리젠트의 두 번째 핵심 아키타입.</div>
+
+  <div class="card-group-title">별 생성 (경제 엔진)</div>
+  <div class="card-list">
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">창세</span> <span class="en">Genesis</span> <span class="tag tag-rare">레어 파워</span></div>
+      <div class="card-desc">2코 파워. 매 턴 <strong>별 2개 자동 생성</strong>. 별 경제의 핵심. 이거 하나로 별 수급 해결</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--star-color)">광채</span> <span class="en">Glow</span></div>
+      <div class="card-desc">1코 <strong>별 1 + 카드 2장 드로우</strong>. 별 수급+덱 순환 동시. 어떤 빌드든 좋음</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--star-color)">비밀 상자</span> <span class="en">Hidden Cache</span></div>
+      <div class="card-desc">1코 별 1 + 다음 턴 별 3. 셋업 카드. <strong>총 별 4개</strong> 생산</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--star-color)">태양의 타격</span> <span class="en">Solar Strike</span></div>
+      <div class="card-desc">1코 8뎀 + <strong>별 1</strong>. 딜+별 동시. 초반 주력</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--star-color)">빛 거두기</span> <span class="en">Gather Light</span></div>
+      <div class="card-desc">1코 방어도 7 + <strong>별 1</strong>. 방어+별 동시. 초반 생존기</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--star-color)">빛나는 타격</span> <span class="en">Shining Strike</span> <span class="tag tag-star">고급</span></div>
+      <div class="card-desc">1코 8뎀 + <strong>별 2 + 뽑을 더미 맨 위로 복귀</strong>. 매 턴 반복 사용 가능. 별 생산 루프의 핵심</div>
+    </div>
+  </div>
+
+  <div class="card-group-title">별 소비 (페이오프)</div>
+  <div class="card-list">
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">일곱 개의 별</span> <span class="en">Seven Stars</span> <span class="tag tag-rare">레어</span></div>
+      <div class="card-desc">2코 별7. 모든 적에게 <strong>7뎀 × 7번</strong>. 총 49뎀 AoE. 강화 시 1코. 보스 킬러</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--star-color)">별의 파동</span> <span class="en">Astral Pulse</span></div>
+      <div class="card-desc">0코 별3. 모든 적에게 <strong>14뎀</strong>. 에너지 없이 쓸 수 있는 AoE</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--star-color)">감마 세례</span> <span class="en">Gamma Blast</span> <span class="tag tag-star">고급</span></div>
+      <div class="card-desc">0코 별3. 13뎀 + <strong>약화 2 + 취약 2</strong>. 별똥별의 완벽한 상위호환</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--star-color)">우주 먼지</span> <span class="en">Stardust</span> <span class="tag tag-star">고급</span></div>
+      <div class="card-desc">0코 별X. 무작위 적 <strong>5뎀 × X번</strong>. 별 많을수록 강해지는 X코스트 폭딜</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--star-color)">반사</span> <span class="en">Reflect</span> <span class="tag tag-star">고급</span></div>
+      <div class="card-desc">1코 별3. <strong>방어도 17</strong> + 막은 피해 반사. 생존+카운터 동시</div>
+    </div>
+  </div>
+
+  <div class="relic-box">
+    <div class="relic-title">추천 유물</div>
+    <div class="relic-item"><strong>달빛 패스트리 (Lunar Pastry)</strong> — 매 턴 끝에 별 1 자동 생성. 필수급</div>
+    <div class="relic-item"><strong>미니 리젠트 (Mini Regent)</strong> — 매 턴 첫 별 소비 시 힘 +1. 별 쓸수록 힘 스케일링</div>
+    <div class="relic-item"><strong>은하 먼지 (Galactic Dust)</strong> — 별 10개 소비할 때마다 방어도 10</div>
+  </div>
+</section>
+
+<!-- ════ BUILD 3: BLACK HOLE STAR CYCLING ════ -->
+<section class="build-section" id="build3">
+  <div class="build-header">
+    <span class="build-num">Build 03</span>
+    <h2 style="color:var(--accent-purple)">블랙홀 별 순환</h2>
+    <span class="diff-badge diff-mid">★★☆ 중급</span>
+  </div>
+  <div class="build-desc">블랙홀(별 얻거나 소비할 때마다 전체 3뎀) + 별의 아이(별 소비 시 방어도) 조합. 별을 얻고 쓰는 모든 행위가 자동으로 딜+방어를 생산하는 패시브 엔진 빌드.</div>
+
+  <div class="card-group-title">핵심 파워 (엔진)</div>
+  <div class="card-list">
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-purple)">블랙홀</span> <span class="en">Black Hole</span> <span class="tag tag-power">파워</span></div>
+      <div class="card-desc">1코 파워. <strong>별 소비/획득할 때마다 전체 적 3뎀</strong>. 강화 시 4뎀. 별 순환할수록 자동 딜</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--star-color)">별의 아이</span> <span class="en">Child of the Stars</span> <span class="tag tag-power">파워</span></div>
+      <div class="card-desc">1코 파워. <strong>별 소비 시 별당 방어도 2</strong>. 강화 시 3. 별 쓸수록 자동 방어</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">창세</span> <span class="en">Genesis</span> <span class="tag tag-rare">레어 파워</span></div>
+      <div class="card-desc">매 턴 별 2 자동. 블랙홀 트리거 2회 (6뎀) 자동 발동</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">궤도</span> <span class="en">Orbit</span> <span class="tag tag-rare">레어 파워</span></div>
+      <div class="card-desc">별 4개 소비할 때마다 <strong>에너지 1</strong>. 별 순환이 에너지 수급까지 해결</div>
+    </div>
+  </div>
+
+  <div class="card-group-title">별 순환 가속기</div>
+  <div class="card-list">
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--star-color)">빛나는 타격</span> <span class="en">Shining Strike</span></div>
+      <div class="card-desc">별 2 생산 + 자동 복귀. 매 턴 블랙홀 트리거 2~4회</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--star-color)">입자 벽</span> <span class="en">Particle Wall</span></div>
+      <div class="card-desc">0코 별2. 방어도 9 + 손으로 복귀. <strong>별 쓸 때 블랙홀+별의 아이 동시 트리거</strong></div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--star-color)">정렬</span> <span class="en">Alignment</span></div>
+      <div class="card-desc">0코 별2. 에너지 1 획득. 별→에너지 변환하면서 블랙홀 트리거</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--star-color)">별의 파동</span> <span class="en">Astral Pulse</span></div>
+      <div class="card-desc">0코 별3. 14뎀 + 블랙홀 트리거 = 전체 17뎀. 에너지 0</div>
+    </div>
+  </div>
+
+  <div class="tip-box">
+    <strong>왜 강하냐면:</strong> 블랙홀은 별을 "얻을 때"와 "쓸 때" 둘 다 트리거됨. 빛나는 타격(별 2 획득 → 6뎀) + 입자 벽(별 2 소비 → 6뎀 + 방어도 4) = 한 사이클에 12뎀+방어도가 자동. 별의 아이까지 있으면 별 소비할 때 방어도도 자동. 카드 쓰는 것만으로 공격과 방어가 동시에 돌아가는 자급자족 엔진.
+  </div>
+
+  <div class="relic-box">
+    <div class="relic-title">추천 유물</div>
+    <div class="relic-item"><strong>달빛 패스트리</strong> — 매 턴 별 1 자동 → 블랙홀 3뎀 공짜</div>
+    <div class="relic-item"><strong>미니 리젠트</strong> — 별 소비 시 힘 +1 → 블랙홀 트리거와 별개로 추가 스케일링</div>
+  </div>
+</section>
+
+<!-- ════ BUILD 4: VOID FORM ════ -->
+<section class="build-section" id="build4">
+  <div class="build-header">
+    <span class="build-num">Build 04</span>
+    <h2 style="color:var(--debuff-color)">공허의 형상 컨트롤</h2>
+    <span class="diff-badge diff-hard">★★★ 고급</span>
+  </div>
+  <div class="build-desc">💡 <strong>고점 최강 빌드.</strong> 공허의 형상으로 매 턴 처음 2장을 무료 사용. 위대한 재련(별4 단조30), 일곱 개의 별(별7 49뎀) 같은 고비용 카드를 에너지/별 무시하고 사용. 덱 구성이 까다롭지만 완성되면 무적.</div>
+
+  <div class="card-group-title">핵심 카드</div>
+  <div class="card-list">
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">공허의 형상</span> <span class="en">Void Form</span> <span class="tag tag-rare">레어 파워</span></div>
+      <div class="card-desc">3코 파워. 턴 즉시 종료. <strong>매 턴 처음 카드 2장 비용 무시</strong>. 강화 시 3장. 이 빌드의 전부</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">위대한 재련</span> <span class="en">The Smith</span> <span class="tag tag-rare">레어</span></div>
+      <div class="card-desc">원래 1코+별4인데 <strong>공허의 형상으로 공짜</strong>. 매 턴 단조 30 무료</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">일곱 개의 별</span> <span class="en">Seven Stars</span> <span class="tag tag-rare">레어</span></div>
+      <div class="card-desc">원래 2코+별7인데 <strong>공허의 형상으로 공짜</strong>. 7×7=49뎀 AoE 무료</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">성대한 도박</span> <span class="en">Royal Gamble</span> <span class="tag tag-rare">레어</span></div>
+      <div class="card-desc">0코 별5. 별 9 획득. <strong>공허의 형상으로 별5 무시 → 순수 별 9개 생성</strong>. 별 경제 사기</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">어려운 결정</span> <span class="en">Decisions</span> <span class="tag tag-rare">레어</span></div>
+      <div class="card-desc">0코 별6. 카드 3장 드로우 + <strong>스킬 1장을 3번 사용</strong>. 공허의 형상으로 공짜면 미쳐</div>
+    </div>
+  </div>
+
+  <div class="card-group-title">서포트 (드로우 + 덱 조작)</div>
+  <div class="card-list">
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--star-color)">희미한 빛</span> <span class="en">Glimmer</span> <span class="tag tag-star">레어</span></div>
+      <div class="card-desc">1코 <strong>3장 드로우</strong> + 카드 1장 덱 위로. 핵심 카드를 다음 턴 첫 드로우로 배치</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--star-color)">필연적인 결과</span> <span class="en">Foregone Conclusion</span> <span class="tag tag-rare">레어</span></div>
+      <div class="card-desc">1코 다음 턴에 <strong>카드 2장 서치</strong>. 공허의 형상으로 쓸 카드를 미리 준비</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--star-color)">수렴</span> <span class="en">Convergence</span></div>
+      <div class="card-desc">1코 다음 턴 에너지+별 환급 + 손패 보존. 셋업 턴 카드를 다음 턴에도 유지</div>
+    </div>
+  </div>
+
+  <div class="combo-box">
+    <div class="combo-title">이상적인 콤보 (공허의 형상 설치 후)</div>
+    <ol>
+      <li>턴 시작 → 첫 2장 무료. <strong>일곱 개의 별</strong> → 전체 49뎀 (무료)</li>
+      <li>두 번째 카드 <strong>위대한 재련</strong> → 단조 30 (무료)</li>
+      <li>강화 시 3장 무료 → <strong>성대한 도박</strong>까지 공짜 → 별 9개 순이익</li>
+      <li>다음 턴도 반복. <strong>매 턴 49뎀+단조30+별9가 무료</strong></li>
+    </ol>
+  </div>
+
+  <div class="tip-box">
+    <strong>주의:</strong> 공허의 형상 설치 턴에 에너지 3을 쓰면서 턴이 즉시 끝남. 그 턴은 아무것도 못 하니까 체력 여유가 있을 때 설치해야 해. 덱을 슬림하게 유지해서 핵심 카드가 첫 드로우에 올 확률을 높이는 게 핵심.
+  </div>
+</section>
+
+<!-- ════ BUILD 5: MINION TRANSFORM ════ -->
+<section class="build-section" id="build5">
+  <div class="build-header">
+    <span class="build-num">Build 05</span>
+    <h2 style="color:var(--minion-color)">하수인 변환</h2>
+    <span class="diff-badge diff-mid">★★☆ 중급</span>
+  </div>
+  <div class="build-desc">💡 <strong>커뮤니티 인기 빌드.</strong> 카드를 0코스트 하수인으로 변환시켜 대량 사용. 돌격!!!!으로 타격 변환, 막아라!!로 방어 변환. 불시착의 잔해까지 활용하면 0코스트 카드 스팸으로 한 턴에 카드 10장+.</div>
+
+  <div class="card-group-title">핵심 카드</div>
+  <div class="card-list">
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--minion-color)">돌격!!!!</span> <span class="en">CHARGE!!</span> <span class="tag tag-minion">하수인</span></div>
+      <div class="card-desc">1코 뽑을 더미 카드 2장을 <strong>하수인 타격(0코 7뎀)</strong>으로 변환. 공격력 공급기</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--minion-color)">막아라!!</span> <span class="en">GUARDS!!!</span> <span class="tag tag-rare">레어</span></div>
+      <div class="card-desc">2코 손에 있는 카드를 원하는 만큼 <strong>하수인 희생(0코 방어도 7)</strong>으로 변환. 소멸. 대량 방어</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--minion-color)">물렀거라!</span> <span class="en">BEGONE!</span></div>
+      <div class="card-desc">1코 4뎀 + 손 카드 1장을 <strong>하수인 투하(0코 전체 7뎀)</strong>로 변환</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">불시착</span> <span class="en">Crash Landing</span> <span class="tag tag-rare">레어</span></div>
+      <div class="card-desc">1코 전체 21뎀 + <strong>손을 잔해로 가득 채움</strong>. 잔해를 하수인으로 변환하면 0코스트 카드 스팸</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">그렇게 하라</span> <span class="en">Make It So</span> <span class="tag tag-rare">레어</span></div>
+      <div class="card-desc">0코 6뎀. <strong>스킬 3장 사용할 때마다 손으로 복귀</strong>. 하수인 스킬 스팸과 완벽한 시너지</div>
+    </div>
+  </div>
+
+  <div class="card-group-title">시너지 카드</div>
+  <div class="card-list">
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">창백한 푸른 점</span> <span class="en">Pale Blue Dot</span> <span class="tag tag-power">파워</span></div>
+      <div class="card-desc">턴에 카드 5장 이상 사용 시 <strong>다음 턴 추가 드로우</strong>. 0코 스팸과 시너지 폭발</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">창조의 기둥</span> <span class="en">Pillar of Creation</span> <span class="tag tag-power">파워</span></div>
+      <div class="card-desc">카드 생성할 때마다 <strong>방어도 3</strong>. 하수인 변환=카드 생성이라 자동 방어</div>
+    </div>
+  </div>
+
+  <div class="tip-box">
+    <strong>왜 강하냐면:</strong> 하수인 타격은 0코스트 7뎀이라 에너지 없이 뽑는 족족 쓸 수 있어. 돌격!!!!로 덱을 하수인으로 채우고, 위풍당당(턴에 5장 쓸 때마다 전체 10뎀)과 조합하면 자동 AoE까지. 잔해 변환 루트는 약간 도박이지만 터지면 한 턴에 10장+ 사용 가능.
+  </div>
+</section>
+
+<!-- ════ BUILD 6: COMET BURST ════ -->
+<section class="build-section" id="build6">
+  <div class="build-header">
+    <span class="build-num">Build 06</span>
+    <h2 style="color:var(--star-color)">혜성 폭격</h2>
+    <span class="diff-badge diff-mid">★★☆ 중급</span>
+  </div>
+  <div class="build-desc">💡 <strong>자체 분석 추천.</strong> 혜성(33뎀+약화3+취약3)과 죽어가는 별(전체 9뎀+적 힘 9 감소)을 축으로, 별을 모았다가 한 번에 쏟아붓는 버스트 딜 빌드. 디버프와 폭딜을 동시에.</div>
+
+  <div class="card-group-title">핵심 카드</div>
+  <div class="card-list">
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">혜성</span> <span class="en">Comet</span> <span class="tag tag-rare">레어</span></div>
+      <div class="card-desc">0코 별5. <strong>33뎀 + 약화 3 + 취약 3</strong>. 강화 시 44뎀. 에너지 0이라 다른 카드도 사용 가능</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">죽어가는 별</span> <span class="en">Dying Star</span> <span class="tag tag-rare">레어</span></div>
+      <div class="card-desc">1코 별3. 휘발성. 전체 9뎀 + <strong>모든 적 이번 턴 힘 9 감소</strong>. 생존+딜 동시</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--star-color)">감마 세례</span> <span class="en">Gamma Blast</span></div>
+      <div class="card-desc">0코 별3. 13뎀 + 약화 2 + 취약 2. 혜성 전 디버프 셋업</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--star-color)">유성우</span> <span class="en">Meteor Shower</span> <span class="tag tag-ancient">고대의 존재</span></div>
+      <div class="card-desc">0코 별2. 전체 14뎀 + <strong>약화 2 + 취약 2</strong>. 별똥별 교체. 고대의 이빨로 획득</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--star-color)">초토화</span> <span class="en">Devastate</span> <span class="tag tag-star">고급</span></div>
+      <div class="card-desc">1코 별4. <strong>30뎀</strong>. 강화 시 40뎀. 순수 고뎀 단타. 별 있으면 무조건 강함</div>
+    </div>
+  </div>
+
+  <div class="card-group-title">별 축적 & 서포트</div>
+  <div class="card-list">
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">창세</span> <span class="en">Genesis</span> <span class="tag tag-rare">레어 파워</span></div>
+      <div class="card-desc">매 턴 별 2. 혜성 쓸 별을 자동 수급</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--star-color)">비밀 상자</span> <span class="en">Hidden Cache</span></div>
+      <div class="card-desc">이번 턴 별1 + 다음 턴 별3. 버스트 턴 직전에 사용</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--star-color)">군주의 시선</span> <span class="en">Monarch's Gaze</span> <span class="tag tag-rare">레어 파워</span></div>
+      <div class="card-desc">3코 파워. 적 공격할 때마다 <strong>적이 힘 1 감소</strong>. 죽어가는 별과 중첩하면 적 힘 0</div>
+    </div>
+  </div>
+
+  <div class="combo-box">
+    <div class="combo-title">버스트 턴 (별 10+ 모은 후)</div>
+    <ol>
+      <li><strong>감마 세례</strong>(0코 별3) → 13뎀 + 약화2+취약2</li>
+      <li><strong>죽어가는 별</strong>(1코 별3) → 전체 9뎀 + 적 힘 -9</li>
+      <li><strong>혜성</strong>(0코 별5) → 33뎀 + 약화3+취약3 (취약 중첩으로 실질 49뎀+)</li>
+      <li>총: <strong>95+뎀 + 적 공격력 거의 0</strong></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ════ BUILD 7: ARSENAL COLORLESS ════ -->
+<section class="build-section" id="build7">
+  <div class="build-header">
+    <span class="build-num">Build 07</span>
+    <h2 style="background:linear-gradient(90deg, var(--accent-brass), #b0b0c0); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">무기고 무색카드 엔진</h2>
+    <span class="diff-badge diff-hard">★★★ 고급</span>
+  </div>
+  <div class="build-desc">💡 <strong>자체 분석 추천 최종 빌드.</strong> 무기고(무색카드 사용 시 힘+1) + 스펙트럼 이동/기쁨의 선물로 무색카드를 대량 수급. 무색카드를 쓸수록 힘이 쌓이고, 힘이 쌓일수록 공격이 강해지는 스노우볼 엔진.</div>
+
+  <div class="card-group-title">핵심 파워</div>
+  <div class="card-list">
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">무기고</span> <span class="en">Arsenal</span> <span class="tag tag-rare">레어 파워</span></div>
+      <div class="card-desc">1코 파워. <strong>무색 카드 사용할 때마다 힘 +1</strong>. 강화 시 +2. 이 빌드의 엔진</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">스펙트럼 이동</span> <span class="en">Spectrum Shift</span> <span class="tag tag-rare">레어 파워</span></div>
+      <div class="card-desc">2코 파워. 매 턴 <strong>무작위 무색카드 1장 손으로</strong>. 강화 시 1코. 무색 자동 수급</div>
+    </div>
+  </div>
+
+  <div class="card-group-title">무색카드 수급</div>
+  <div class="card-list">
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--minion-color)">권위 행사</span> <span class="en">Manifest Authority</span></div>
+      <div class="card-desc">1코 방어도 7 + <strong>무작위 무색카드 1장</strong>. 방어+무색 수급 동시</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--minion-color)">준항성</span> <span class="en">Quasar</span></div>
+      <div class="card-desc">0코 별2. 무작위 무색카드 3장 중 <strong>1장 선택</strong>. 원하는 카드 골라잡기</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">기쁨의 선물</span> <span class="en">Bundle of Joy</span> <span class="tag tag-rare">레어</span></div>
+      <div class="card-desc">2코 무작위 무색카드 <strong>3장</strong> 손으로. 소멸. 한 턴에 힘 +3(강화 시 +6)</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">선조의 망치</span> <span class="en">Heirloom Hammer</span> <span class="tag tag-rare">레어</span></div>
+      <div class="card-desc">2코 17뎀 + 손에 있는 <strong>무색카드 1장 복사</strong>. 좋은 무색카드를 2번 사용</div>
+    </div>
+  </div>
+
+  <div class="tip-box">
+    <strong>왜 강하냐면:</strong> 무기고 강화 시 무색카드 1장당 힘 +2. 스펙트럼 이동으로 매 턴 1장, 권위 행사로 1장, 준항성으로 1장 = 매 턴 힘 +6. 여기에 기쁨의 선물이 터지면 한 턴에 힘 +6~8 추가. 힘 15에 천상의 권능(6뎀×3) 쓰면 히트당 21뎀 = 63뎀. 무색카드 풀에 전략의 천재(0코 3장 드로우)나 충격파(전체 디버프) 뜨면 공짜 보너스.
+  </div>
+</section>
+
+<!-- ════ BUILD 8: PARTICLE WALL LOOP ════ -->
+<section class="build-section" id="build8">
+  <div class="build-header">
+    <span class="build-num">Build 08</span>
+    <h2 style="color:var(--block-color)">입자 벽 루프</h2>
+    <span class="diff-badge diff-mid">★★☆ 중급</span>
+  </div>
+  <div class="build-desc">💡 <strong>커뮤니티 발견 강빌드.</strong> 입자 벽(0코 별2, 방어도 9, 손 복귀)을 무한 반복해서 방어도를 수백까지 쌓는 빌드. 별의 아이와 조합하면 별 소비할 때마다 추가 방어도. 빛나는 타격 루프로 별 자동 수급.</div>
+
+  <div class="card-group-title">핵심 카드</div>
+  <div class="card-list">
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--block-color)">입자 벽</span> <span class="en">Particle Wall</span> <span class="tag tag-star">핵심</span></div>
+      <div class="card-desc">0코 별2. 방어도 9 + <strong>손으로 복귀</strong>. 강화 시 12. 별만 있으면 무한 반복. 이 빌드의 윈컨</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--star-color)">별의 아이</span> <span class="en">Child of the Stars</span> <span class="tag tag-power">파워</span></div>
+      <div class="card-desc">별 소비 시 <strong>별당 방어도 2</strong>. 입자 벽 1회 = 추가 방어도 4 → 총 방어도 13</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--star-color)">빛나는 타격</span> <span class="en">Shining Strike</span></div>
+      <div class="card-desc">1코 8뎀 + 별 2 + 덱 위 복귀. <strong>매 턴 별 2 자동 공급</strong>으로 입자 벽 1회 보장</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">창세</span> <span class="en">Genesis</span> <span class="tag tag-rare">레어 파워</span></div>
+      <div class="card-desc">매 턴 별 2. 입자 벽 추가 1회. 빛나는 타격과 합치면 매 턴 별 4 = 입자 벽 2회 = 방어도 26+</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">나는 무적이다</span> <span class="en">I Am Invincible</span> <span class="tag tag-rare">레어</span></div>
+      <div class="card-desc">1코 방어도 9 + <strong>턴 종료 시 뽑을 더미 위에 있으면 자동 사용</strong>. 매 턴 추가 방어도 9</div>
+    </div>
+  </div>
+
+  <div class="card-group-title">공격 피니셔</div>
+  <div class="card-list">
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">천원돌파</span> <span class="en">Heavenly Drill</span> <span class="tag tag-rare">레어</span></div>
+      <div class="card-desc">X코. 8뎀 × X번. <strong>X≥4면 X가 2배</strong>. 에너지 4 쓰면 8×8=64뎀. 별로 번 에너지로 폭딜</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--star-color)">포격</span> <span class="en">Bombardment</span> <span class="tag tag-rare">레어</span></div>
+      <div class="card-desc">3코 18뎀 + 소멸 후 <strong>매 턴 자동 사용</strong>. 한 번 쓰면 매 턴 18뎀 자동</div>
+    </div>
+  </div>
+
+  <div class="combo-box">
+    <div class="combo-title">입자 벽 루프 (별 10+ 보유 시)</div>
+    <ol>
+      <li><strong>입자 벽</strong> (별2 소비 → 방어도 9 + 별의 아이 4 = 13) → 손 복귀</li>
+      <li><strong>입자 벽</strong> 반복 (별2 소비 → 방어도 13) → 손 복귀</li>
+      <li>별 다 쓸 때까지 반복 → 별 10이면 <strong>5회 × 13 = 방어도 65</strong></li>
+      <li>블랙홀까지 있으면 매 소비마다 전체 3뎀 × 5회 = 15뎀 추가</li>
+    </ol>
+  </div>
+
+  <div class="relic-box">
+    <div class="relic-title">추천 유물</div>
+    <div class="relic-item"><strong>달빛 패스트리</strong> — 매 턴 별 1. 입자 벽 추가 반복 가능</div>
+    <div class="relic-item"><strong>소리굽쇠</strong> — 스킬 10장 사용 시 방어도 7. 입자 벽 스팸으로 자연 달성</div>
+    <div class="relic-item"><strong>케미컬 X</strong> — X코스트 효과 +2. 천원돌파와 시너지</div>
+  </div>
+</section>
+
+<!-- ════ COLORLESS ════ -->
+<section class="colorless-section" id="colorless">
+  <h2 style="color:#b0b0c0">범용 무색 카드 추천</h2>
+  <div class="section-desc">어떤 빌드든 상점/이벤트에서 보면 챙기면 좋은 카드들. 리젠트는 무기고, 준항성 등 무색카드와의 시너지가 특히 강해서 더 가치 있어.</div>
+  <div class="card-list">
+    <div class="card-item">
+      <div class="card-name"><span style="color:#b0b0c0">전략의 천재</span> <span class="en">Master of Strategy</span> <span class="tag tag-colorless">레어</span></div>
+      <div class="card-desc">0코스트 3장 드로우. 소멸. 어떤 덱이든 무조건 좋아. 무기고 있으면 힘+1 보너스</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:#b0b0c0">비밀 병기 / 비밀 기술</span> <span class="en">Secret Weapon / Technique</span> <span class="tag tag-colorless">레어</span></div>
+      <div class="card-desc">0코스트 공격/스킬 서치. 핵심 카드 찾기</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:#b0b0c0">충격파</span> <span class="en">Shockwave</span> <span class="tag tag-colorless">고급</span></div>
+      <div class="card-desc">전체 약화+취약 3. 혜성 빌드면 시너지 폭발</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:#b0b0c0">위풍당당</span> <span class="en">Panache</span> <span class="tag tag-colorless">파워</span></div>
+      <div class="card-desc">턴에 카드 5장 쓸 때마다 전체 10뎀. 하수인 스팸/입자 벽 루프에서 자연 달성</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:#b0b0c0">어둠의 족쇄</span> <span class="en">Dark Shackles</span> <span class="tag tag-colorless">고급</span></div>
+      <div class="card-desc">0코스트 적 힘 9 감소. 보스전 긴급 생존기. 죽어가는 별과 중첩 시 적 힘 완전 무력화</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:#b0b0c0">임명</span> <span class="en">Anointed</span> <span class="tag tag-colorless">레어</span></div>
+      <div class="card-desc">뽑을 더미의 모든 레어를 손으로. 공허의 형상+창세+일곱 개의 별 한 번에</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:#b0b0c0">휘갈김</span> <span class="en">Scrawl</span> <span class="tag tag-colorless">레어</span></div>
+      <div class="card-desc">1코 손이 가득 찰 때까지 드로우. 하수인/입자 벽 빌드에서 대량 드로우</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ TIPS ════ -->
+<section class="tips-section" id="tips">
+  <h2>초반 운영 팁</h2>
+  <div class="tip-item"><span class="tip-num">1</span> <strong>신성한 빛은 전투당 3별.</strong> 턴마다 리필 안 돼. 별 생성 카드 없이 별 카드만 잔뜩 모으면 망해. 별 생성과 별 소비의 균형이 핵심.</div>
+  <div class="tip-item"><span class="tip-num">2</span> <strong>Act 1은 빌드 고르지 마.</strong> 단조 카드가 몰리면 칼날, 별 카드가 몰리면 별 빌드. 뜨는 카드에 유연하게 대응하는 게 맞아.</div>
+  <div class="tip-item"><span class="tip-num">3</span> <strong>광채는 만능.</strong> 별 1+카드 2장 드로우. 어떤 빌드든 들어감. 보이면 챙겨.</div>
+  <div class="tip-item"><span class="tip-num">4</span> <strong>칼날은 보존이라 손에 남아.</strong> 그래서 손이 1장 줄어든 셈. 덱을 슬림하게 유지해서 핵심 카드 드로우 확률을 보정해야 해.</div>
+  <div class="tip-item"><span class="tip-num">5</span> <strong>별을 아껴. 급하게 쓰지 마.</strong> 별은 턴 넘겨도 사라지지 않아. 방어가 가능한 턴이면 별 아끼고, 폭딜 턴에 한꺼번에 쏟아붓는 게 효율적.</div>
+  <div class="tip-item"><span class="tip-num">6</span> <strong>단조 빌드면 앞으로 오라를 찾아.</strong> 칼날을 어디서든 손으로 가져오는 카드. 칼날을 매 턴 쓸 수 있게 해줘서 DPS가 2배.</div>
+  <div class="tip-item"><span class="tip-num">7</span> <strong>두 빌드를 섞지 마.</strong> 단조와 별 양쪽 다 가져가면 둘 다 중간만 해. 한 쪽에 올인해야 돼.</div>
+</section>
+
+<footer>
+  Slay the Spire 2 — Regent Deck Building Guide<br>
+  Built with ⭐ by a fellow Spire climber
+</footer>
+
+</div>
+
+<!-- ════ FIXED SIDEBAR NAV ════ -->
+<nav class="side-nav" id="sideNav">
+  <a href="#concepts" data-section="concepts"><span class="nav-icon">📖</span><span class="nav-label">기본 개념</span><span class="nav-dot"></span></a>
+  <a href="#build1" data-section="build1"><span class="nav-icon">⚔️</span><span class="nav-label">칼날 단조</span><span class="nav-dot"></span></a>
+  <a href="#build2" data-section="build2"><span class="nav-icon">⭐</span><span class="nav-label">별 스케일링</span><span class="nav-dot"></span></a>
+  <a href="#build3" data-section="build3"><span class="nav-icon">🌀</span><span class="nav-label">블랙홀 순환</span><span class="nav-dot"></span></a>
+  <a href="#build4" data-section="build4"><span class="nav-icon">🌑</span><span class="nav-label">공허의 형상</span><span class="nav-dot"></span></a>
+  <a href="#build5" data-section="build5"><span class="nav-icon">👑</span><span class="nav-label">하수인 변환</span><span class="nav-dot"></span></a>
+  <a href="#build6" data-section="build6"><span class="nav-icon">☄️</span><span class="nav-label">혜성 폭격</span><span class="nav-dot"></span></a>
+  <a href="#build7" data-section="build7"><span class="nav-icon">🗡️</span><span class="nav-label">무기고 무색</span><span class="nav-dot"></span></a>
+  <a href="#build8" data-section="build8"><span class="nav-icon">🛡️</span><span class="nav-label">입자 벽 루프</span><span class="nav-dot"></span></a>
+  <a href="#colorless" data-section="colorless"><span class="nav-icon">🃏</span><span class="nav-label">무색 카드</span><span class="nav-dot"></span></a>
+  <a href="#tips" data-section="tips"><span class="nav-icon">💡</span><span class="nav-label">운영 팁</span><span class="nav-dot"></span></a>
+</nav>
+
+<script>
+(function() {
+  const navLinks = document.querySelectorAll('.side-nav a[data-section]');
+  const sections = [];
+  navLinks.forEach(link => {
+    const id = link.getAttribute('data-section');
+    const el = document.getElementById(id);
+    if (el) sections.push({ id, el, link });
+  });
+  navLinks.forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const id = link.getAttribute('data-section');
+      const target = document.getElementById(id);
+      if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); history.replaceState(null, '', '#' + id); }
+    });
+  });
+  let ticking = false;
+  function updateActive() {
+    const scrollY = window.scrollY + 120;
+    let current = sections[0];
+    for (const s of sections) { if (s.el.offsetTop <= scrollY) current = s; }
+    navLinks.forEach(l => l.classList.remove('active'));
+    if (current) current.link.classList.add('active');
+    ticking = false;
+  }
+  window.addEventListener('scroll', () => { if (!ticking) { requestAnimationFrame(updateActive); ticking = true; } });
+  updateActive();
+})();
+</script>
+</body>
+</html>
