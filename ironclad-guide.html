@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>아이언클래드 덱 빌딩 가이드 — Slay the Spire 2</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Cinzel:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep: #0c0808;
+  --bg-card: #161010;
+  --bg-card-hover: #201818;
+  --border-dim: #3a2020;
+  --border-glow: #a03030;
+  --accent-red: #e04040;
+  --accent-crimson: #c02020;
+  --accent-orange: #e08040;
+  --accent-gold: #f0c040;
+  --accent-cyan: #4ecdc4;
+  --accent-green: #50c878;
+  --accent-blue: #5090e0;
+  --text-bright: #f0e8e8;
+  --text-mid: #b0a0a0;
+  --text-dim: #806060;
+  --str-color: #e04040;
+  --block-color: #5090e0;
+  --exhaust-color: #c080e0;
+  --blood-color: #c02020;
+  --vuln-color: #e08040;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg-deep);
+  color: var(--text-bright);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-weight: 400;
+  line-height: 1.7;
+  min-height: 100vh;
+}
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(160,48,48,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(224,64,64,0.05) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+.container {
+  max-width: 860px;
+  margin: 0 auto;
+  margin-right: max(calc((100vw - 860px) / 2), 80px);
+  padding: 0 24px;
+  position: relative;
+  z-index: 1;
+}
+header { text-align: center; padding: 80px 0 48px; }
+header::after {
+  content: '';
+  display: block;
+  width: 120px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-red), transparent);
+  margin: 32px auto 0;
+}
+header h1 {
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  letter-spacing: 0.05em;
+  background: linear-gradient(135deg, var(--accent-red), var(--accent-orange));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+header .subtitle {
+  font-size: 0.95rem;
+  color: var(--text-dim);
+  margin-top: 12px;
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+nav.toc {
+  background: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  border-radius: 12px;
+  padding: 24px 28px;
+  margin-bottom: 48px;
+}
+nav.toc h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-dim); margin-bottom: 16px; }
+nav.toc ul { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+nav.toc a { color: var(--text-mid); text-decoration: none; font-size: 0.9rem; padding: 6px 12px; border-radius: 6px; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
+nav.toc a:hover { color: var(--text-bright); background: rgba(224,64,64,0.08); }
+nav.toc .diff { font-size: 0.7rem; letter-spacing: 1px; }
+.concepts { background: var(--bg-card); border: 1px solid var(--border-dim); border-radius: 12px; padding: 28px; margin-bottom: 48px; }
+.concepts h2 { font-family: 'Cinzel', serif; font-size: 1.2rem; color: var(--accent-red); margin-bottom: 16px; }
+.concept-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.concept-item { background: rgba(224,64,64,0.04); border: 1px solid rgba(224,64,64,0.1); border-radius: 8px; padding: 16px; }
+.concept-item .label { font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; }
+.concept-item .desc { font-size: 0.8rem; color: var(--text-mid); line-height: 1.5; }
+.build-section { margin-bottom: 56px; scroll-margin-top: 24px; }
+.build-header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 8px; flex-wrap: wrap; }
+.build-header h2 { font-family: 'Cinzel', serif; font-size: 1.5rem; font-weight: 700; }
+.build-header .build-num { font-family: 'Cinzel', serif; font-size: 0.8rem; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; }
+.diff-badge { font-size: 0.7rem; padding: 3px 10px; border-radius: 100px; letter-spacing: 0.05em; font-weight: 500; }
+.diff-easy { background: rgba(80,200,120,0.15); color: var(--accent-green); border: 1px solid rgba(80,200,120,0.25); }
+.diff-mid { background: rgba(240,192,64,0.12); color: var(--accent-gold); border: 1px solid rgba(240,192,64,0.2); }
+.diff-hard { background: rgba(192,128,224,0.12); color: var(--exhaust-color); border: 1px solid rgba(192,128,224,0.2); }
+.build-desc { color: var(--text-mid); font-size: 0.9rem; margin-bottom: 20px; padding-left: 2px; }
+.card-group-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-dim); margin: 20px 0 10px; padding-left: 4px; }
+.card-list { display: flex; flex-direction: column; gap: 6px; }
+.card-item { display: grid; grid-template-columns: minmax(140px, auto) 1fr; gap: 12px; background: var(--bg-card); border: 1px solid var(--border-dim); border-radius: 8px; padding: 12px 16px; transition: border-color 0.2s, background 0.2s; align-items: baseline; }
+.card-item:hover { border-color: var(--border-glow); background: var(--bg-card-hover); }
+.card-name { font-weight: 700; font-size: 0.9rem; white-space: nowrap; }
+.card-name .en { font-weight: 300; font-size: 0.75rem; color: var(--text-dim); margin-left: 4px; }
+.card-desc { font-size: 0.85rem; color: var(--text-mid); line-height: 1.5; }
+.card-desc strong { color: var(--text-bright); font-weight: 500; }
+.tag { display: inline-block; font-size: 0.65rem; padding: 1px 6px; border-radius: 3px; font-weight: 500; vertical-align: middle; margin-left: 4px; }
+.tag-str { background: rgba(224,64,64,0.2); color: var(--str-color); }
+.tag-block { background: rgba(80,144,224,0.15); color: var(--block-color); }
+.tag-exhaust { background: rgba(192,128,224,0.15); color: var(--exhaust-color); }
+.tag-blood { background: rgba(192,32,32,0.2); color: var(--blood-color); }
+.tag-vuln { background: rgba(224,128,64,0.15); color: var(--vuln-color); }
+.tag-power { background: rgba(224,128,64,0.15); color: var(--accent-orange); }
+.tag-rare { background: rgba(240,192,64,0.12); color: var(--accent-gold); }
+.tag-ancient { background: rgba(224,64,64,0.15); color: var(--accent-red); }
+.tag-colorless { background: rgba(176,176,192,0.1); color: #b0b0c0; }
+.relic-box { background: rgba(240,192,64,0.04); border: 1px solid rgba(240,192,64,0.15); border-radius: 8px; padding: 14px 18px; margin-top: 14px; }
+.relic-box .relic-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent-gold); margin-bottom: 6px; }
+.relic-box .relic-item { font-size: 0.85rem; color: var(--text-mid); line-height: 1.6; }
+.relic-box .relic-item strong { color: var(--accent-gold); font-weight: 500; }
+.tip-box { background: rgba(78,205,196,0.05); border-left: 3px solid var(--accent-cyan); border-radius: 0 8px 8px 0; padding: 14px 18px; margin-top: 14px; font-size: 0.85rem; color: var(--text-mid); line-height: 1.6; }
+.tip-box strong { color: var(--accent-cyan); }
+.combo-box { background: rgba(224,64,64,0.05); border: 1px solid rgba(224,64,64,0.15); border-radius: 8px; padding: 18px; margin-top: 14px; }
+.combo-box .combo-title { font-size: 0.8rem; font-weight: 700; color: var(--accent-red); margin-bottom: 8px; }
+.combo-box ol { padding-left: 20px; font-size: 0.85rem; color: var(--text-mid); line-height: 1.8; }
+.combo-box ol strong { color: var(--text-bright); }
+.colorless-section { margin-bottom: 56px; scroll-margin-top: 24px; }
+.colorless-section h2 { font-family: 'Cinzel', serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
+.colorless-section .section-desc { color: var(--text-mid); font-size: 0.9rem; margin-bottom: 20px; }
+.tips-section { background: var(--bg-card); border: 1px solid var(--border-dim); border-radius: 12px; padding: 28px; margin-bottom: 56px; scroll-margin-top: 24px; }
+.tips-section h2 { font-family: 'Cinzel', serif; font-size: 1.3rem; color: var(--accent-red); margin-bottom: 16px; }
+.tips-section .tip-item { padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.9rem; color: var(--text-mid); line-height: 1.6; }
+.tips-section .tip-item:last-child { border-bottom: none; }
+.tips-section .tip-item strong { color: var(--text-bright); }
+.tips-section .tip-num { display: inline-block; width: 24px; height: 24px; line-height: 24px; text-align: center; background: rgba(224,64,64,0.15); color: var(--accent-red); border-radius: 6px; font-size: 0.75rem; font-weight: 700; margin-right: 10px; }
+footer { text-align: center; padding: 48px 0; color: var(--text-dim); font-size: 0.75rem; letter-spacing: 0.05em; }
+footer a { color: var(--accent-red); text-decoration: none; }
+
+/* ── Fixed Sidebar Nav ── */
+.side-nav { position: fixed; right: 20px; top: 50%; transform: translateY(-50%); z-index: 100; display: flex; flex-direction: column; gap: 2px; }
+.side-nav a { display: flex; align-items: center; gap: 10px; text-decoration: none; padding: 8px 14px; border-radius: 8px; background: rgba(22,16,16,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid transparent; transition: all 0.25s ease; }
+.side-nav a:hover { background: rgba(32,24,24,0.95); border-color: var(--border-dim); }
+.side-nav a.active { background: rgba(224,64,64,0.12); border-color: var(--accent-red); }
+.side-nav .nav-icon { font-size: 1rem; width: 20px; text-align: center; flex-shrink: 0; }
+.side-nav .nav-label { font-size: 0.75rem; font-weight: 500; color: var(--text-dim); white-space: nowrap; max-width: 0; overflow: hidden; opacity: 0; transition: max-width 0.3s ease, opacity 0.25s ease, color 0.25s ease; }
+.side-nav:hover .nav-label { max-width: 160px; opacity: 1; }
+.side-nav a.active .nav-label { color: var(--accent-red); }
+.side-nav a:hover .nav-label { color: var(--text-bright); }
+.side-nav .nav-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-dim); flex-shrink: 0; transition: all 0.25s; }
+.side-nav a.active .nav-dot { background: var(--accent-red); box-shadow: 0 0 8px rgba(224,64,64,0.5); width: 8px; height: 8px; }
+
+@media (max-width: 1200px) {
+  .side-nav .nav-label { display: none; }
+  .side-nav a { padding: 8px 10px; }
+  .container { margin-right: auto; max-width: 900px; }
+}
+@media (max-width: 768px) {
+  .side-nav { position: fixed; right: 0; top: auto; bottom: 0; left: 0; transform: none; flex-direction: row; justify-content: center; gap: 0; background: rgba(12,8,8,0.95); backdrop-filter: blur(16px); border-top: 1px solid var(--border-dim); padding: 6px 4px; overflow-x: auto; }
+  .side-nav a { padding: 8px 10px; border-radius: 6px; flex-direction: column; gap: 2px; background: transparent; border: none; }
+  .side-nav a.active { background: rgba(224,64,64,0.12); }
+  .side-nav .nav-label { display: none; }
+  .side-nav .nav-dot { display: none; }
+  .side-nav .nav-icon { font-size: 0.9rem; }
+  body { padding-bottom: 56px; }
+}
+@media (max-width: 640px) {
+  .container { padding: 0 16px; margin-right: auto; }
+  header { padding: 48px 0 32px; }
+  nav.toc ul { grid-template-columns: 1fr; }
+  .concept-grid { grid-template-columns: 1fr; }
+  .card-item { grid-template-columns: 1fr; gap: 4px; }
+  .build-header { flex-direction: column; gap: 8px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>IRONCLAD</h1>
+  <div class="subtitle">Slay the Spire 2 · 덱 빌딩 가이드</div>
+</header>
+
+<nav class="toc">
+  <h2>목차</h2>
+  <ul>
+    <li><a href="#concepts">📖 기본 개념</a></li>
+    <li><a href="#build1">⚔️ 빌드 1 — 힘 스케일링 <span class="diff">★☆☆</span></a></li>
+    <li><a href="#build2">🛡️ 빌드 2 — 방어도 몸통 박치기 <span class="diff">★★☆</span></a></li>
+    <li><a href="#build3">🔥 빌드 3 — 소멸 엔진 <span class="diff">★★★</span></a></li>
+    <li><a href="#build4">🩸 빌드 4 — 사혈 출혈 <span class="diff">★★☆</span></a></li>
+    <li><a href="#build5">💢 빌드 5 — 취약 특화 <span class="diff">★★☆</span></a></li>
+    <li><a href="#build6">😈 빌드 6 — 지옥검무 분노 스팸 <span class="diff">★★☆</span></a></li>
+    <li><a href="#build7">⚡ 빌드 7 — 사혈+소멸 하이브리드 <span class="diff">★★★</span></a></li>
+    <li><a href="#colorless">🃏 범용 무색 카드</a></li>
+    <li><a href="#tips">💡 초반 운영 팁</a></li>
+  </ul>
+</nav>
+
+<section class="concepts" id="concepts">
+  <h2>기본 개념</h2>
+  <div class="concept-grid">
+    <div class="concept-item">
+      <div class="label" style="color:var(--str-color)">⚔️ 힘 (Strength)</div>
+      <div class="desc">공격 카드의 <strong>모든 히트</strong>에 힘만큼 추가 피해. 다타 공격에 적용되면 폭발적. 아이언클래드의 핵심 스탯.</div>
+    </div>
+    <div class="concept-item">
+      <div class="label" style="color:var(--exhaust-color)">🔥 소멸 (Exhaust)</div>
+      <div class="desc">사용한 카드가 영구적으로 제거됨. 아이언클래드는 이걸 <strong>자원으로 활용</strong>해서 방어도/드로우/피해를 얻는 유일한 캐릭터.</div>
+    </div>
+    <div class="concept-item">
+      <div class="label" style="color:var(--blood-color)">🩸 사혈 (Bloodletting)</div>
+      <div class="desc">자기 체력을 잃어서 에너지/힘/카드를 얻는 메카닉. <strong>불타는 혈액</strong> (매 전투 후 6 회복)이 리스크를 상쇄.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ BUILD 1: STRENGTH ════ -->
+<section class="build-section" id="build1">
+  <div class="build-header">
+    <span class="build-num">Build 01</span>
+    <h2 style="color:var(--str-color)">힘 스케일링</h2>
+    <span class="diff-badge diff-easy">★☆☆ 입문</span>
+  </div>
+  <div class="build-desc">힘을 쌓고 다타 공격으로 폭딜. 가장 직관적이고 강력한 기본 빌드. 힘 10에 부메랑 칼날 4히트 = 히트당 +10 = 추가 40뎀.</div>
+
+  <div class="card-group-title">힘 쌓기</div>
+  <div class="card-list">
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-orange)">악마의 형상</span> <span class="en">Demon Form</span> <span class="tag tag-power">레어 파워</span></div>
+      <div class="card-desc">매 턴 시작 시 <strong>힘 +2</strong>. 깔아두면 턴마다 자동 성장. 이 빌드의 핵심</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-orange)">발화</span> <span class="en">Inflame</span> <span class="tag tag-power">파워</span></div>
+      <div class="card-desc">힘 +2. 즉시 적용되는 영구 힘. 초반에 뜨면 무조건 챙겨</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--str-color)">사전 타격</span> <span class="en">Setup Strike</span> <span class="tag tag-str">힘</span></div>
+      <div class="card-desc">7뎀 + 이번 턴 힘 2. 공격하면서 힘도 챙김</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--str-color)">덤벼라!</span> <span class="en">Fight Me!</span> <span class="tag tag-str">힘</span></div>
+      <div class="card-desc">5뎀 ×2 + <strong>힘 +2</strong> (적도 힘 +1). 다타+힘 동시</div>
+    </div>
+  </div>
+
+  <div class="card-group-title">다타 공격 (힘 증폭기)</div>
+  <div class="card-list">
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-red)">소용돌이</span> <span class="en">Whirlwind</span> <span class="tag tag-str">고급</span></div>
+      <div class="card-desc"><strong>전체 적에게 5뎀 × X번</strong>. 에너지 전부 쏟으면 힘이 모든 히트에 적용. 보스 킬러</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-red)">부메랑 칼날</span> <span class="en">Sword Boomerang</span></div>
+      <div class="card-desc">랜덤 적 3뎀 ×3. <strong>힘 10이면 39뎀</strong>. 강화 시 4히트</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-red)">이중 타격</span> <span class="en">Twin Strike</span></div>
+      <div class="card-desc">5뎀 ×2. 안정적인 2히트 공격</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">몽둥이질</span> <span class="en">Bludgeon</span> <span class="tag tag-rare">레어</span></div>
+      <div class="card-desc"><strong>32뎀</strong> 단타. 힘 스케일링 + 이 한 방으로 엘리트 즉사급</div>
+    </div>
+  </div>
+
+  <div class="relic-box">
+    <div class="relic-title">추천 유물</div>
+    <div class="relic-item"><strong>금강저</strong> — 매 전투 시작 시 힘 +1</div>
+    <div class="relic-item"><strong>표창</strong> — 공격 카드 3장 사용 시마다 힘 +1</div>
+    <div class="relic-item"><strong>펜 촉</strong> — 10번째 공격 카드 피해 2배</div>
+  </div>
+</section>
+
+<!-- ════ BUILD 2: BLOCK/BODY SLAM ════ -->
+<section class="build-section" id="build2">
+  <div class="build-header">
+    <span class="build-num">Build 02</span>
+    <h2 style="color:var(--block-color)">방어도 몸통 박치기</h2>
+    <span class="diff-badge diff-mid">★★☆ 중급</span>
+  </div>
+  <div class="build-desc">방어도를 잔뜩 쌓고 몸통 박치기로 방어도만큼 피해. 바리케이드로 방어도가 안 사라지면 매 턴 누적되면서 한 방이 100+.</div>
+
+  <div class="card-group-title">핵심 카드</div>
+  <div class="card-list">
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--block-color)">몸통 박치기</span> <span class="en">Body Slam</span> <span class="tag tag-block">윈컨</span></div>
+      <div class="card-desc"><strong>현재 방어도만큼 피해</strong>. 강화 시 0코스트. 이 빌드의 피니셔</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">바리케이드</span> <span class="en">Barricade</span> <span class="tag tag-power">레어 파워</span></div>
+      <div class="card-desc"><strong>방어도가 턴 끝에 안 사라짐</strong>. 이거 깔리면 방어도 무한 누적. 빌드의 핵심</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--block-color)">흘려보내기</span> <span class="en">Shrug It Off</span></div>
+      <div class="card-desc">방어도 8 + 카드 1장 드로우. 방어+드로우 동시. 모든 빌드에서 좋음</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--block-color)">화염 장벽</span> <span class="en">Flame Barrier</span></div>
+      <div class="card-desc">방어도 12 + 공격받을 때마다 반격 4뎀. 다타 적 상대로 최강</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--block-color)">피의 벽</span> <span class="en">Blood Wall</span></div>
+      <div class="card-desc">체력 2 잃고 <strong>방어도 16</strong>. 가성비 최고 방어 카드</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-orange)">돌 갑옷</span> <span class="en">Stone Armor</span> <span class="tag tag-power">파워</span></div>
+      <div class="card-desc">판금 4. 매 턴 자동으로 방어도 4 쌓임</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">절대적인 힘</span> <span class="en">Juggernaut</span> <span class="tag tag-power">레어 파워</span></div>
+      <div class="card-desc"><strong>방어도 얻을 때마다 랜덤 적 5뎀</strong>. 바리케이드와 같이 쓰면 방어=공격</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">요지부동</span> <span class="en">Unmovable</span> <span class="tag tag-power">레어 파워</span></div>
+      <div class="card-desc">매 턴 처음 방어도 <strong>2배</strong>. 바리케이드 없어도 방어도 누적 보조</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">무적</span> <span class="en">Impervious</span> <span class="tag tag-rare">레어</span></div>
+      <div class="card-desc"><strong>방어도 30</strong>. 소멸이지만 한 방에 막대한 방어도 → 몸통 박치기 30뎀</div>
+    </div>
+  </div>
+
+  <div class="relic-box">
+    <div class="relic-title">추천 유물</div>
+    <div class="relic-item"><strong>오리하르콘</strong> — 턴 끝에 방어도 없으면 방어도 6</div>
+    <div class="relic-item"><strong>소뿔모양 걸이</strong> — 2턴째 시작 시 방어도 14</div>
+    <div class="relic-item"><strong>튼튼한 조임쇠</strong> — 방어도 최대 10 유지 (바리케이드 없을 때 보조)</div>
+  </div>
+</section>
+
+<!-- ════ BUILD 3: EXHAUST ENGINE ════ -->
+<section class="build-section" id="build3">
+  <div class="build-header">
+    <span class="build-num">Build 03</span>
+    <h2 style="color:var(--exhaust-color)">소멸 엔진</h2>
+    <span class="diff-badge diff-hard">★★★ 고급</span>
+  </div>
+  <div class="build-desc">타락 + 어둠의 포옹 + 무감각 "성삼위일체"로 스킬 카드를 0코스트로 쓰면서 소멸시키고, 소멸할 때마다 드로우+방어도를 얻는 사이클 엔진.</div>
+
+  <div class="card-group-title">성삼위일체 (3개 다 깔아야 완성)</div>
+  <div class="card-list">
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-red)">타락</span> <span class="en">Corruption</span> <span class="tag tag-ancient">고대의 존재</span></div>
+      <div class="card-desc"><strong>모든 스킬 카드 0코스트 + 사용 시 소멸</strong>. 엔진의 연료 공급기</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">어둠의 포옹</span> <span class="en">Dark Embrace</span> <span class="tag tag-power">레어 파워</span></div>
+      <div class="card-desc"><strong>카드 소멸 시마다 1장 드로우</strong>. 스킬 쓸 때마다 다음 카드가 바로 옴</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-orange)">무감각</span> <span class="en">Feel No Pain</span> <span class="tag tag-power">파워</span></div>
+      <div class="card-desc"><strong>카드 소멸 시마다 방어도 3</strong>. 스킬 쓸 때마다 자동 방어</div>
+    </div>
+  </div>
+
+  <div class="card-group-title">소멸 서포트 & 피니셔</div>
+  <div class="card-list">
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--exhaust-color)">잿빛 타격</span> <span class="en">Ashen Strike</span> <span class="tag tag-exhaust">소멸</span></div>
+      <div class="card-desc">6뎀 + <strong>소멸 더미 카드 1장당 +3</strong>. 소멸 많이 할수록 폭딜. 피니셔</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--exhaust-color)">조약의 끝</span> <span class="en">Pact's End</span> <span class="tag tag-rare">레어</span></div>
+      <div class="card-desc">소멸 더미 3장 이상일 때만 사용. <strong>전체 17뎀</strong>. AoE 피니셔</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--exhaust-color)">지옥불</span> <span class="en">Fiend Fire</span> <span class="tag tag-rare">레어</span></div>
+      <div class="card-desc">손에 있는 <strong>모든 카드 소멸 → 장당 7뎀</strong>. 한 방에 손 전부 태워서 폭딜</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--exhaust-color)">불타는 조약</span> <span class="en">Burning Pact</span></div>
+      <div class="card-desc">카드 1장 소멸 + 2장 드로우. 덱 압축+순환</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--exhaust-color)">진정한 끈기</span> <span class="en">True Grit</span></div>
+      <div class="card-desc">방어도 7 + 카드 1장 소멸. 방어하면서 소멸 트리거</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--exhaust-color)">기사회생</span> <span class="en">Second Wind</span></div>
+      <div class="card-desc">공격 아닌 모든 카드 소멸 + <strong>장당 방어도 5</strong>. 타락과 조합하면 대량 소멸+방어</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--block-color)">몸통 박치기</span> <span class="en">Body Slam</span></div>
+      <div class="card-desc">무감각으로 쌓인 방어도 → 그대로 피해. 소멸 엔진의 서브 피니셔</div>
+    </div>
+  </div>
+
+  <div class="relic-box">
+    <div class="relic-title">추천 유물</div>
+    <div class="relic-item"><strong>카론의 유골</strong> — 카드 소멸 시 전체 적에게 3뎀 (있으면 사기)</div>
+    <div class="relic-item"><strong>게임용 말</strong> — 파워 카드 사용 시 1장 드로우</div>
+  </div>
+</section>
+
+<!-- ════ BUILD 4: BLOODLETTING ════ -->
+<section class="build-section" id="build4">
+  <div class="build-header">
+    <span class="build-num">Build 04</span>
+    <h2 style="color:var(--blood-color)">사혈 출혈</h2>
+    <span class="diff-badge diff-mid">★★☆ 중급</span>
+  </div>
+  <div class="build-desc">자기 체력을 깎아서 힘/에너지/카드를 얻는 하이리스크 하이리턴 빌드. 파열로 사혈→힘 변환, 불바다로 사혈→전체뎀.</div>
+
+  <div class="card-group-title">핵심 카드</div>
+  <div class="card-list">
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-orange)">파열</span> <span class="en">Rupture</span> <span class="tag tag-power">파워</span></div>
+      <div class="card-desc"><strong>내 턴에 체력 잃을 때마다 힘 +1</strong>. 사혈 카드와 조합하면 힘이 폭발적으로 쌓임</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-orange)">불바다</span> <span class="en">Inferno</span> <span class="tag tag-power">파워</span></div>
+      <div class="card-desc">매 턴 체력 1 잃음 + <strong>체력 잃을 때마다 전체 적 6뎀</strong>. 사혈할수록 전체딜</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-orange)">핏빛 망토</span> <span class="en">Crimson Mantle</span> <span class="tag tag-power">파워</span></div>
+      <div class="card-desc">매 턴 체력 1 잃고 방어도 8. 자동 사혈 트리거 + 방어</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--blood-color)">사혈</span> <span class="en">Bloodletting</span> <span class="tag tag-blood">사혈</span></div>
+      <div class="card-desc">체력 3 잃고 <strong>에너지 2</strong> 획득. 0코스트 에너지 부스터</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--blood-color)">혈류</span> <span class="en">Hemokinesis</span> <span class="tag tag-blood">사혈</span></div>
+      <div class="card-desc">체력 2 잃고 <strong>14뎀</strong>. 1코에 이 화력은 사기급</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--blood-color)">정면 돌파</span> <span class="en">Breakthrough</span> <span class="tag tag-blood">사혈</span></div>
+      <div class="card-desc">체력 1 잃고 전체 9뎀. AoE + 사혈 트리거</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">제물</span> <span class="en">Offering</span> <span class="tag tag-rare">레어</span></div>
+      <div class="card-desc">체력 6 잃고 <strong>에너지 2 + 카드 3장 드로우</strong>. 파열 있으면 힘도 올라감</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">갈가리 찢기</span> <span class="en">Tear Asunder</span> <span class="tag tag-rare">레어</span></div>
+      <div class="card-desc">5뎀 × <strong>이번 전투에서 체력 잃은 횟수</strong>. 사혈 많이 했을수록 폭딜</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">포식</span> <span class="en">Feed</span> <span class="tag tag-rare">레어</span></div>
+      <div class="card-desc">10뎀 + 치명타 시 <strong>최대 체력 +3</strong>. 잃은 체력을 영구적으로 보상</div>
+    </div>
+  </div>
+
+  <div class="relic-box">
+    <div class="relic-title">추천 유물</div>
+    <div class="relic-item"><strong>붉은 해골</strong> — 체력 50% 이하일 때 힘 +3 (사혈 빌드에서 상시 발동)</div>
+    <div class="relic-item"><strong>어두운 피</strong> — 전투 종료 시 12 회복 (보스 유물, 불타는 혈액 대체)</div>
+  </div>
+</section>
+
+<!-- ════ BUILD 5: VULNERABLE ════ -->
+<section class="build-section" id="build5">
+  <div class="build-header">
+    <span class="build-num">Build 05</span>
+    <h2 style="color:var(--vuln-color)">취약 특화</h2>
+    <span class="diff-badge diff-mid">★★☆ 중급</span>
+  </div>
+  <div class="build-desc">💡 <strong>자체 분석 추천.</strong> 취약을 잔뜩 쌓고 → 제압으로 힘 전환 → 해체로 2배 피해. 나무위키에서도 별도 아키타입으로 소개되는 숨은 강빌드.</div>
+
+  <div class="card-group-title">핵심 카드</div>
+  <div class="card-list">
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--vuln-color)">제압</span> <span class="en">Dominate</span> <span class="tag tag-vuln">취약 핵심</span></div>
+      <div class="card-desc"><strong>적의 취약 스택당 힘 +1</strong>. 취약 10 쌓으면 힘 10 획득. 이 빌드의 윈컨. 강화 시 소멸 제거!</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--vuln-color)">포악함</span> <span class="en">Vicious</span> <span class="tag tag-power">파워</span></div>
+      <div class="card-desc"><strong>취약 부여할 때마다 카드 1장 드로우</strong>. 전체 취약 카드면 적 수만큼 드로우. 덱 순환 핵심</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">악랄함</span> <span class="en">Cruelty</span> <span class="tag tag-power">레어 파워</span></div>
+      <div class="card-desc">취약 적이 받는 <strong>피해 +25% (강화 시 +50%)</strong>. 취약 빌드의 데미지 앰프</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--vuln-color)">천둥</span> <span class="en">Thunderclap</span></div>
+      <div class="card-desc">전체 4뎀 + <strong>전체 취약 1</strong>. 포악함과 조합하면 적 수만큼 드로우</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--vuln-color)">떨림</span> <span class="en">Tremble</span></div>
+      <div class="card-desc">1코에 취약 2 (강화 시 3). 취약 전문 공급기</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--vuln-color)">녹아내리는 주먹</span> <span class="en">Molten Fist</span></div>
+      <div class="card-desc">10뎀 + <strong>적 취약 2배</strong>. 소멸. 취약 5면 → 10으로!</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--vuln-color)">해체</span> <span class="en">Dismantle</span></div>
+      <div class="card-desc">8뎀, <strong>적이 취약이면 2번 적중</strong>. 제압으로 쌓은 힘이 2배 적용</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">거상</span> <span class="en">Colossus</span> <span class="tag tag-rare">레어</span></div>
+      <div class="card-desc">방어도 5 + <strong>취약 적에게서 받는 피해 50% 감소</strong>. 취약 빌드의 생존 핵심</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-red)">박살</span> <span class="en">Break</span> <span class="tag tag-ancient">고대의 존재</span></div>
+      <div class="card-desc">20뎀 + <strong>취약 5</strong>. 고대의 이빨로 획득. 강타 대체. 취약 빌드의 핵심 업그레이드</div>
+    </div>
+  </div>
+
+  <div class="combo-box">
+    <div class="combo-title">이상적인 콤보</div>
+    <ol>
+      <li><strong>천둥</strong>으로 전체 취약 1 (포악함으로 드로우)</li>
+      <li><strong>녹아내리는 주먹</strong>으로 취약 2배</li>
+      <li><strong>제압</strong>으로 취약 스택만큼 힘 획득</li>
+      <li><strong>해체</strong>로 2히트 (힘이 양쪽에 다 적용) → 폭딜</li>
+    </ol>
+  </div>
+
+  <div class="relic-box">
+    <div class="relic-title">추천 유물</div>
+    <div class="relic-item"><strong>종이 게구리</strong> — 취약 적 피해 +50% → +75%로 증가 (아이언클래드 전용)</div>
+    <div class="relic-item"><strong>구슬 주머니</strong> — 전투 시작 시 전체 취약 1</div>
+  </div>
+</section>
+
+<!-- ════ BUILD 6: HELLRAISER + ANGER ════ -->
+<section class="build-section" id="build6">
+  <div class="build-header">
+    <span class="build-num">Build 06</span>
+    <h2 style="color:var(--accent-orange)">지옥검무 + 분노 스팸</h2>
+    <span class="diff-badge diff-mid">★★☆ 중급</span>
+  </div>
+  <div class="build-desc">💡 <strong>커뮤니티 인기 빌드.</strong> 분노(0코스트, 자기복제)로 덱을 타격으로 채우고, 지옥검무가 타격 뽑을 때마다 자동 사용. 카오스 그 자체.</div>
+
+  <div class="card-group-title">핵심 카드</div>
+  <div class="card-list">
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">지옥검무</span> <span class="en">Hellraiser</span> <span class="tag tag-power">레어 파워</span></div>
+      <div class="card-desc">"타격" 카드를 <strong>뽑을 때마다 자동으로 무작위 적에게 사용</strong>. 타격 카드가 공짜 자동 공격기가 됨</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-red)">분노</span> <span class="en">Anger</span></div>
+      <div class="card-desc"><strong>0코스트 6뎀 + 자기복제</strong>. 쓸수록 덱에 분노가 늘어남. 지옥검무의 연료</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-red)">폼멜 타격</span> <span class="en">Pommel Strike</span></div>
+      <div class="card-desc">9뎀 + 1장 드로우. 이름에 "타격" → 지옥검무 트리거. 드로우로 추가 타격도 뽑을 수 있음</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--str-color)">전투 최면</span> <span class="en">Battle Trance</span></div>
+      <div class="card-desc">카드 3장 대량 드로우. <strong>뽑은 카드 중 타격이 있으면 지옥검무가 전부 자동 발사</strong></div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--str-color)">갈취</span> <span class="en">Pillage</span></div>
+      <div class="card-desc">6뎀 + <strong>공격 아닌 카드 나올 때까지 드로우</strong>. 타격이 연속으로 뽑히면 지옥검무 연쇄 폭발</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-orange)">저글링</span> <span class="en">Juggling</span> <span class="tag tag-power">파워</span></div>
+      <div class="card-desc">매 턴 3번째 공격 카드 복사본을 손에 추가. 분노 스팸과 시너지 극대화</div>
+    </div>
+  </div>
+
+  <div class="tip-box">
+    <strong>왜 강하냐면:</strong> 분노가 자기복제로 덱에 쌓이면, 지옥검무가 뽑을 때마다 공짜로 쏴줌. 전투 최면이나 갈취로 대량 드로우하면 한 턴에 자동 공격이 5~8번 터짐. 힘까지 있으면 미쳐.
+  </div>
+</section>
+
+<!-- ════ BUILD 7: SELF-DAMAGE + EXHAUST HYBRID ════ -->
+<section class="build-section" id="build7">
+  <div class="build-header">
+    <span class="build-num">Build 07</span>
+    <h2 style="background:linear-gradient(90deg, var(--blood-color), var(--exhaust-color)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">사혈+소멸 하이브리드</h2>
+    <span class="diff-badge diff-hard">★★★ 고급</span>
+  </div>
+  <div class="build-desc">💡 <strong>자체 분석 추천 최종 빌드.</strong> 사혈로 힘 쌓기 + 소멸로 방어/드로우. 파열+불바다로 사혈 보상, 무감각+어둠의 포옹으로 소멸 보상을 동시에.</div>
+
+  <div class="card-group-title">사혈 엔진</div>
+  <div class="card-list">
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-orange)">파열</span> <span class="en">Rupture</span> <span class="tag tag-power">파워</span></div>
+      <div class="card-desc">체력 잃을 때마다 힘 +1</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-orange)">불바다</span> <span class="en">Inferno</span> <span class="tag tag-power">파워</span></div>
+      <div class="card-desc">체력 잃을 때마다 전체 6뎀</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--blood-color)">사혈</span> <span class="en">Bloodletting</span></div>
+      <div class="card-desc">체력 3 잃고 에너지 2. 파열+불바다 동시 트리거</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--blood-color)">피의 벽</span> <span class="en">Blood Wall</span></div>
+      <div class="card-desc">체력 2 잃고 방어도 16. 사혈+방어 동시. 소멸 아니라 반복 가능</div>
+    </div>
+  </div>
+
+  <div class="card-group-title">소멸 엔진</div>
+  <div class="card-list">
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-orange)">무감각</span> <span class="en">Feel No Pain</span> <span class="tag tag-power">파워</span></div>
+      <div class="card-desc">소멸 시마다 방어도 3</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">어둠의 포옹</span> <span class="en">Dark Embrace</span> <span class="tag tag-power">레어 파워</span></div>
+      <div class="card-desc">소멸 시마다 1장 드로우</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--exhaust-color)">불타는 조약</span> <span class="en">Burning Pact</span></div>
+      <div class="card-desc">1장 소멸 + 2장 드로우</div>
+    </div>
+  </div>
+
+  <div class="card-group-title">피니셔</div>
+  <div class="card-list">
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--accent-gold)">갈가리 찢기</span> <span class="en">Tear Asunder</span> <span class="tag tag-rare">레어</span></div>
+      <div class="card-desc">5뎀 × 체력 잃은 횟수. 사혈 많이 했으면 <strong>후반 30+히트</strong></div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:var(--exhaust-color)">잿빛 타격</span> <span class="en">Ashen Strike</span></div>
+      <div class="card-desc">소멸 더미 카드당 +3뎀. 소멸 엔진 가동 후 피니셔</div>
+    </div>
+  </div>
+
+  <div class="combo-box">
+    <div class="combo-title">이상적인 턴 (파워 4장 가정)</div>
+    <ol>
+      <li><strong>사혈</strong> → 에너지 2 + 파열로 힘+1 + 불바다로 전체 6뎀</li>
+      <li><strong>불타는 조약</strong> → 카드 소멸 + 2장 드로우 + 무감각 방어도 3 + 어둠의 포옹 드로우</li>
+      <li>추가 스킬 카드로 방어도 쌓으면서 소멸 트리거 반복</li>
+      <li><strong>갈가리 찢기</strong>로 다타 피니시 (힘이 적용된 ×N히트)</li>
+    </ol>
+  </div>
+
+  <div class="relic-box">
+    <div class="relic-title">추천 유물</div>
+    <div class="relic-item"><strong>붉은 해골</strong> — 체력 50% 이하 시 힘 +3</div>
+    <div class="relic-item"><strong>카론의 유골</strong> — 소멸 시 전체 3뎀</div>
+    <div class="relic-item"><strong>어두운 피</strong> — 전투 종료 시 12 회복</div>
+  </div>
+</section>
+
+<!-- ════ COLORLESS ════ -->
+<section class="colorless-section" id="colorless">
+  <h2 style="color:#b0b0c0">범용 무색 카드 추천</h2>
+  <div class="section-desc">어떤 빌드든 상점/이벤트에서 보면 챙기면 좋은 카드들.</div>
+  <div class="card-list">
+    <div class="card-item">
+      <div class="card-name"><span style="color:#b0b0c0">전략의 천재</span> <span class="en">Master of Strategy</span> <span class="tag tag-colorless">레어</span></div>
+      <div class="card-desc">0코스트 3장 드로우. 어떤 덱이든 무조건 좋아</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:#b0b0c0">비밀 병기 / 비밀 기술</span> <span class="en">Secret Weapon / Technique</span> <span class="tag tag-colorless">레어</span></div>
+      <div class="card-desc">0코스트 공격/스킬 서치. 핵심 카드 찾기</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:#b0b0c0">충격파</span> <span class="en">Shockwave</span> <span class="tag tag-colorless">고급</span></div>
+      <div class="card-desc">전체 약화+취약 3. 취약 빌드면 시너지 폭발</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:#b0b0c0">위풍당당</span> <span class="en">Panache</span> <span class="tag tag-colorless">파워</span></div>
+      <div class="card-desc">턴에 카드 5장 쓸 때마다 전체 10뎀. 분노 스팸/소멸 빌드에서 자연 달성</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:#b0b0c0">어둠의 족쇄</span> <span class="en">Dark Shackles</span> <span class="tag tag-colorless">고급</span></div>
+      <div class="card-desc">0코스트 적 힘 9 감소. 보스전 긴급 생존기</div>
+    </div>
+    <div class="card-item">
+      <div class="card-name"><span style="color:#b0b0c0">임명</span> <span class="en">Anointed</span> <span class="tag tag-colorless">레어</span></div>
+      <div class="card-desc">뽑을 더미의 모든 레어를 손으로. 악마의 형상+바리케이드 한 번에</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ TIPS ════ -->
+<section class="tips-section" id="tips">
+  <h2>초반 운영 팁</h2>
+  <div class="tip-item"><span class="tip-num">1</span> <strong>불타는 혈액이 안전망.</strong> 매 전투 후 6 회복이라 Act 1에서 실수해도 괜찮아. 적극적으로 엘리트 도전.</div>
+  <div class="tip-item"><span class="tip-num">2</span> <strong>타격/수비 카드는 빨리 제거.</strong> 상점이나 이벤트에서 기본 카드를 빼야 핵심 카드 드로우 확률이 올라감.</div>
+  <div class="tip-item"><span class="tip-num">3</span> <strong>흘려보내기는 만능.</strong> 방어도+드로우 동시에 주는 카드는 어떤 빌드에든 들어감. 보이면 챙겨.</div>
+  <div class="tip-item"><span class="tip-num">4</span> <strong>Act 1은 빌드 확정하지 마.</strong> 뜨는 카드에 맞춰 유연하게. 힘 카드가 몰리면 힘 빌드, 소멸이 몰리면 소멸 엔진.</div>
+  <div class="tip-item"><span class="tip-num">5</span> <strong>힘은 다타 공격과 세트.</strong> 힘만 쌓고 단타 공격만 있으면 비효율적. 소용돌이/부메랑 칼날 같은 다타 카드 확보 필수.</div>
+</section>
+
+<footer>
+  Slay the Spire 2 — Ironclad Deck Building Guide<br>
+  Built with 🔥 by a fellow Spire climber
+</footer>
+
+</div>
+
+<!-- ════ FIXED SIDEBAR NAV ════ -->
+<nav class="side-nav" id="sideNav">
+  <a href="#concepts" data-section="concepts"><span class="nav-icon">📖</span><span class="nav-label">기본 개념</span><span class="nav-dot"></span></a>
+  <a href="#build1" data-section="build1"><span class="nav-icon">⚔️</span><span class="nav-label">힘 스케일링</span><span class="nav-dot"></span></a>
+  <a href="#build2" data-section="build2"><span class="nav-icon">🛡️</span><span class="nav-label">방어도 몸통 박치기</span><span class="nav-dot"></span></a>
+  <a href="#build3" data-section="build3"><span class="nav-icon">🔥</span><span class="nav-label">소멸 엔진</span><span class="nav-dot"></span></a>
+  <a href="#build4" data-section="build4"><span class="nav-icon">🩸</span><span class="nav-label">사혈 출혈</span><span class="nav-dot"></span></a>
+  <a href="#build5" data-section="build5"><span class="nav-icon">💢</span><span class="nav-label">취약 특화</span><span class="nav-dot"></span></a>
+  <a href="#build6" data-section="build6"><span class="nav-icon">😈</span><span class="nav-label">지옥검무 분노</span><span class="nav-dot"></span></a>
+  <a href="#build7" data-section="build7"><span class="nav-icon">⚡</span><span class="nav-label">사혈+소멸 하이브리드</span><span class="nav-dot"></span></a>
+  <a href="#colorless" data-section="colorless"><span class="nav-icon">🃏</span><span class="nav-label">무색 카드</span><span class="nav-dot"></span></a>
+  <a href="#tips" data-section="tips"><span class="nav-icon">💡</span><span class="nav-label">운영 팁</span><span class="nav-dot"></span></a>
+</nav>
+
+<script>
+(function() {
+  const navLinks = document.querySelectorAll('.side-nav a[data-section]');
+  const sections = [];
+  navLinks.forEach(link => {
+    const id = link.getAttribute('data-section');
+    const el = document.getElementById(id);
+    if (el) sections.push({ id, el, link });
+  });
+  navLinks.forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const id = link.getAttribute('data-section');
+      const target = document.getElementById(id);
+      if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); history.replaceState(null, '', '#' + id); }
+    });
+  });
+  let ticking = false;
+  function updateActive() {
+    const scrollY = window.scrollY + 120;
+    let current = sections[0];
+    for (const s of sections) { if (s.el.offsetTop <= scrollY) current = s; }
+    navLinks.forEach(l => l.classList.remove('active'));
+    if (current) current.link.classList.add('active');
+    ticking = false;
+  }
+  window.addEventListener('scroll', () => { if (!ticking) { requestAnimationFrame(updateActive); ticking = true; } });
+  updateActive();
+})();
+</script>
+</body>
+</html>
