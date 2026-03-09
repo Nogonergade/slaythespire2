@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>사일런트 덱 빌딩 가이드 — Slay the Spire 2</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Cinzel:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg-deep:#080c08;--bg-card:#101610;--bg-card-hover:#182018;--border-dim:#203020;--border-glow:#308030;--accent-green:#40c060;--accent-emerald:#20a050;--accent-lime:#80d040;--accent-teal:#30b0a0;--accent-gold:#f0c040;--accent-red:#e04050;--accent-orange:#e08040;--accent-purple:#a060d0;--text-bright:#e8f0e8;--text-mid:#a0b0a0;--text-dim:#607060;--poison-color:#50c050;--shiv-color:#c0c040;--sly-color:#40b0d0;--draw-color:#d0a040}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg-deep);color:var(--text-bright);font-family:'Noto Sans KR',sans-serif;font-weight:400;line-height:1.7;min-height:100vh}
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 20% 0%,rgba(48,128,48,0.08) 0%,transparent 60%),radial-gradient(ellipse at 80% 100%,rgba(64,192,96,0.05) 0%,transparent 60%);pointer-events:none;z-index:0}
+.container{max-width:860px;margin:0 auto;margin-right:max(calc((100vw - 860px)/2),80px);padding:0 24px;position:relative;z-index:1}
+header{text-align:center;padding:80px 0 48px}header::after{content:'';display:block;width:120px;height:2px;background:linear-gradient(90deg,transparent,var(--accent-green),transparent);margin:32px auto 0}
+header h1{font-family:'Cinzel',serif;font-weight:900;font-size:clamp(2rem,5vw,3.2rem);letter-spacing:.05em;background:linear-gradient(135deg,var(--accent-green),var(--accent-teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+header .subtitle{font-size:.95rem;color:var(--text-dim);margin-top:12px;font-weight:300;letter-spacing:.08em;text-transform:uppercase}
+nav.toc{background:var(--bg-card);border:1px solid var(--border-dim);border-radius:12px;padding:24px 28px;margin-bottom:48px}
+nav.toc h2{font-size:.75rem;text-transform:uppercase;letter-spacing:.15em;color:var(--text-dim);margin-bottom:16px}
+nav.toc ul{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+nav.toc a{color:var(--text-mid);text-decoration:none;font-size:.9rem;padding:6px 12px;border-radius:6px;display:flex;align-items:center;gap:8px;transition:all .2s}nav.toc a:hover{color:var(--text-bright);background:rgba(64,192,96,0.08)}
+.concepts{background:var(--bg-card);border:1px solid var(--border-dim);border-radius:12px;padding:28px;margin-bottom:48px}
+.concepts h2{font-family:'Cinzel',serif;font-size:1.2rem;color:var(--accent-green);margin-bottom:16px}
+.concept-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}
+.concept-item{background:rgba(64,192,96,0.04);border:1px solid rgba(64,192,96,0.1);border-radius:8px;padding:16px}
+.concept-item .label{font-weight:700;font-size:.85rem;margin-bottom:4px}.concept-item .desc{font-size:.8rem;color:var(--text-mid);line-height:1.5}
+.philosophy{background:var(--bg-card);border:1px solid rgba(224,64,80,0.2);border-radius:12px;padding:28px;margin-bottom:48px}
+.philosophy h2{font-family:'Cinzel',serif;font-size:1.2rem;color:var(--accent-red);margin-bottom:16px}
+.philosophy .phil-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.philosophy .phil-item{background:rgba(224,64,80,0.04);border:1px solid rgba(224,64,80,0.1);border-radius:8px;padding:16px}
+.philosophy .phil-item .label{font-weight:700;font-size:.85rem;margin-bottom:4px;color:var(--accent-red)}.philosophy .phil-item .desc{font-size:.8rem;color:var(--text-mid);line-height:1.5}
+.build-section{margin-bottom:56px;scroll-margin-top:24px}
+.build-header{display:flex;align-items:baseline;gap:16px;margin-bottom:8px;flex-wrap:wrap}
+.build-header h2{font-family:'Cinzel',serif;font-size:1.5rem;font-weight:700}
+.build-header .build-num{font-family:'Cinzel',serif;font-size:.8rem;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase}
+.diff-badge{font-size:.7rem;padding:3px 10px;border-radius:100px;letter-spacing:.05em;font-weight:500}
+.diff-easy{background:rgba(80,200,120,0.15);color:var(--accent-green);border:1px solid rgba(80,200,120,0.25)}
+.diff-mid{background:rgba(240,192,64,0.12);color:var(--accent-gold);border:1px solid rgba(240,192,64,0.2)}
+.diff-hard{background:rgba(64,176,208,0.12);color:var(--sly-color);border:1px solid rgba(64,176,208,0.2)}
+.build-desc{color:var(--text-mid);font-size:.9rem;margin-bottom:20px}
+.card-group-title{font-size:.75rem;text-transform:uppercase;letter-spacing:.15em;color:var(--text-dim);margin:20px 0 10px;padding-left:4px}
+.card-list{display:flex;flex-direction:column;gap:6px}
+.card-item{display:grid;grid-template-columns:minmax(130px,auto) 1fr;gap:12px;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:8px;padding:12px 16px;transition:border-color .2s,background .2s;align-items:baseline}
+.card-item:hover{border-color:var(--border-glow);background:var(--bg-card-hover)}
+.card-name{font-weight:700;font-size:.9rem;white-space:nowrap}.card-name .en{font-weight:300;font-size:.75rem;color:var(--text-dim);margin-left:4px}
+.card-desc{font-size:.85rem;color:var(--text-mid);line-height:1.5}.card-desc strong{color:var(--text-bright);font-weight:500}
+.tag{display:inline-block;font-size:.65rem;padding:1px 6px;border-radius:3px;font-weight:500;vertical-align:middle;margin-left:4px}
+.tag-poison{background:rgba(80,192,80,0.2);color:var(--poison-color)}.tag-shiv{background:rgba(192,192,64,0.15);color:var(--shiv-color)}.tag-sly{background:rgba(64,176,208,0.15);color:var(--sly-color)}.tag-draw{background:rgba(208,160,64,0.15);color:var(--draw-color)}.tag-power{background:rgba(224,128,64,0.15);color:var(--accent-orange)}.tag-rare{background:rgba(240,192,64,0.12);color:var(--accent-gold)}.tag-ancient{background:rgba(64,192,96,0.15);color:var(--accent-green)}.tag-colorless{background:rgba(176,176,192,0.1);color:#b0b0c0}
+.relic-box{background:rgba(240,192,64,0.04);border:1px solid rgba(240,192,64,0.15);border-radius:8px;padding:14px 18px;margin-top:14px}
+.relic-box .relic-title{font-size:.75rem;text-transform:uppercase;letter-spacing:.12em;color:var(--accent-gold);margin-bottom:6px}
+.relic-box .relic-item{font-size:.85rem;color:var(--text-mid);line-height:1.6}.relic-box .relic-item strong{color:var(--accent-gold);font-weight:500}
+.tip-box{background:rgba(78,205,196,0.05);border-left:3px solid var(--accent-teal);border-radius:0 8px 8px 0;padding:14px 18px;margin-top:14px;font-size:.85rem;color:var(--text-mid);line-height:1.6}.tip-box strong{color:var(--accent-teal)}
+.warn-box{background:rgba(224,64,80,0.05);border-left:3px solid var(--accent-red);border-radius:0 8px 8px 0;padding:14px 18px;margin-top:14px;font-size:.85rem;color:var(--text-mid);line-height:1.6}.warn-box strong{color:var(--accent-red)}
+.combo-box{background:rgba(64,192,96,0.05);border:1px solid rgba(64,192,96,0.15);border-radius:8px;padding:18px;margin-top:14px}
+.combo-box .combo-title{font-size:.8rem;font-weight:700;color:var(--accent-green);margin-bottom:8px}
+.combo-box ol{padding-left:20px;font-size:.85rem;color:var(--text-mid);line-height:1.8}.combo-box ol strong{color:var(--text-bright)}
+.colorless-section{margin-bottom:56px;scroll-margin-top:24px}
+.colorless-section h2{font-family:'Cinzel',serif;font-size:1.5rem;font-weight:700;margin-bottom:8px}
+.colorless-section .section-desc{color:var(--text-mid);font-size:.9rem;margin-bottom:20px}
+.tips-section{background:var(--bg-card);border:1px solid var(--border-dim);border-radius:12px;padding:28px;margin-bottom:56px;scroll-margin-top:24px}
+.tips-section h2{font-family:'Cinzel',serif;font-size:1.3rem;color:var(--accent-green);margin-bottom:16px}
+.tips-section .tip-item{padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:.9rem;color:var(--text-mid);line-height:1.6}
+.tips-section .tip-item:last-child{border-bottom:none}.tips-section .tip-item strong{color:var(--text-bright)}
+.tips-section .tip-num{display:inline-block;width:24px;height:24px;line-height:24px;text-align:center;background:rgba(64,192,96,0.15);color:var(--accent-green);border-radius:6px;font-size:.75rem;font-weight:700;margin-right:10px}
+footer{text-align:center;padding:48px 0;color:var(--text-dim);font-size:.75rem;letter-spacing:.05em}
+.side-nav{position:fixed;right:20px;top:50%;transform:translateY(-50%);z-index:100;display:flex;flex-direction:column;gap:2px}
+.side-nav a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:8px 14px;border-radius:8px;background:rgba(16,22,16,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid transparent;transition:all .25s ease}
+.side-nav a:hover{background:rgba(24,32,24,0.95);border-color:var(--border-dim)}.side-nav a.active{background:rgba(64,192,96,0.12);border-color:var(--accent-green)}
+.side-nav .nav-icon{font-size:1rem;width:20px;text-align:center;flex-shrink:0}
+.side-nav .nav-label{font-size:.75rem;font-weight:500;color:var(--text-dim);white-space:nowrap;max-width:0;overflow:hidden;opacity:0;transition:max-width .3s ease,opacity .25s ease,color .25s ease}
+.side-nav:hover .nav-label{max-width:160px;opacity:1}.side-nav a.active .nav-label{color:var(--accent-green)}.side-nav a:hover .nav-label{color:var(--text-bright)}
+.side-nav .nav-dot{width:6px;height:6px;border-radius:50%;background:var(--text-dim);flex-shrink:0;transition:all .25s}
+.side-nav a.active .nav-dot{background:var(--accent-green);box-shadow:0 0 8px rgba(64,192,96,0.5);width:8px;height:8px}
+@media(max-width:1200px){.side-nav .nav-label{display:none}.side-nav a{padding:8px 10px}.container{margin-right:auto;max-width:900px}}
+@media(max-width:768px){.side-nav{position:fixed;right:0;top:auto;bottom:0;left:0;transform:none;flex-direction:row;justify-content:center;gap:0;background:rgba(8,12,8,0.95);backdrop-filter:blur(16px);border-top:1px solid var(--border-dim);padding:6px 4px;overflow-x:auto}.side-nav a{padding:8px 10px;border-radius:6px;flex-direction:column;gap:2px;background:transparent;border:none}.side-nav a.active{background:rgba(64,192,96,0.12)}.side-nav .nav-label,.side-nav .nav-dot{display:none}.side-nav .nav-icon{font-size:.9rem}body{padding-bottom:56px}}
+@media(max-width:640px){.container{padding:0 16px;margin-right:auto}header{padding:48px 0 32px}nav.toc ul{grid-template-columns:1fr}.concept-grid{grid-template-columns:1fr 1fr}.philosophy .phil-grid{grid-template-columns:1fr}.card-item{grid-template-columns:1fr;gap:4px}.build-header{flex-direction:column;gap:8px}}
+</style>
+</head>
+<body>
+<div class="container">
+<header><h1>THE SILENT</h1><div class="subtitle">Slay the Spire 2 · 덱 빌딩 가이드</div></header>
+<nav class="toc"><h2>목차</h2><ul>
+<li><a href="#concepts">📖 기본 개념</a></li>
+<li><a href="#philosophy">⚠️ 사일런트의 본질</a></li>
+<li><a href="#build1">🧪 빌드 1 — 독 빌드 <span class="diff">★☆☆</span></a></li>
+<li><a href="#build2">🗡️ 빌드 2 — 단도 빌드 <span class="diff">★★☆</span></a></li>
+<li><a href="#build3">💨 빌드 3 — 교활 버리기 엔진 <span class="diff">★★★</span></a></li>
+<li><a href="#build4">🃏 빌드 4 — 드로우 연쇄 <span class="diff">★★☆</span></a></li>
+<li><a href="#build5">🐍 빌드 5 — 독+단도 하이브리드 <span class="diff">★★☆</span></a></li>
+<li><a href="#build6">⚡ 빌드 6 — 그림자 폭발 <span class="diff">★★★</span></a></li>
+<li><a href="#colorless">🃏 범용 무색 카드</a></li>
+<li><a href="#tips">💡 운영 팁 & 주의사항</a></li>
+</ul></nav>
+
+<section class="concepts" id="concepts"><h2>기본 개념</h2><div class="concept-grid">
+<div class="concept-item"><div class="label" style="color:var(--poison-color)">🧪 중독 (Poison)</div><div class="desc">적에게 쌓이는 디버프. 매 턴 <strong>중독만큼 피해</strong> 후 1 감소. 촉매로 2배(강화 시 3배), 촉진제로 추가 틱.</div></div>
+<div class="concept-item"><div class="label" style="color:var(--shiv-color)">🗡️ 단도 (Shiv)</div><div class="desc">0코스트 4뎀 <strong>소멸</strong> 카드. 정밀로 +4뎀, 칼날 부채로 전체 공격화. STS2에서 소멸이라 칼날 함정(Knife Trap)으로 회수.</div></div>
+<div class="concept-item"><div class="label" style="color:var(--sly-color)">💨 교활 (Sly)</div><div class="desc">STS2 신규. 카드를 <strong>버릴 때 자동 무료 사용</strong>. 버리기 = 공짜 플레이. 현재 최강 메카닉.</div></div>
+<div class="concept-item"><div class="label" style="color:var(--draw-color)">🎴 버리기</div><div class="desc">사일런트의 핵심. 곡예/생존자/계산된 도박으로 버리면서 교활 트리거 + 팅샤/질긴 붕대 보상.</div></div>
+</div></section>
+
+<!-- PHILOSOPHY -->
+<section class="philosophy" id="philosophy"><h2>⚠️ 사일런트의 본질 — 이것만은 알고 가라</h2><div class="phil-grid">
+<div class="phil-item"><div class="label">🔗 카드 시너지가 전부다</div><div class="desc">개별 카드가 약하고 스킬카드가 강하다. 카드 간 시너지가 극도로 중요하며, <strong>시너지 없이 좋은 카드만 모아봤자 이길 수 없다.</strong> 스네코 해골, 표본을 갖고도 덱이 안 맞으면 진다.</div></div>
+<div class="phil-item"><div class="label">🔀 덱 꼬임 = 사망</div><div class="desc">사일런트는 덱이 쉽게 꼬인다. 카드를 집을 때마다 <strong>"이 카드가 내 덱을 꼬이게 하지 않나?"</strong> 자문해라. 쓸데없는 카드 한 장이 핵심 콤보를 1턴 늦추고 그게 곧 사망이다.</div></div>
+<div class="phil-item"><div class="label">✂️ 카드 제거 > 카드 추가</div><div class="desc">타격/수비 제거가 카드 추가보다 훨씬 가치 높다. 덱은 <strong>25~30장</strong> 이하로 유지. 상점에서 제거를 가장 먼저 고려해라.</div></div>
+<div class="phil-item"><div class="label">🚫 빌드를 강제하지 마라</div><div class="desc">독 빌드 가고 싶은데 단도 카드만 나오면? <strong>단도를 집어.</strong> 주어진 카드로 최선의 덱을 짜는 게 사일런트의 핵심. 컨셉 플레이가 하고 싶으면 디펙트를 해라.</div></div>
+</div></section>
+
+<!-- BUILD 1: POISON -->
+<section class="build-section" id="build1"><div class="build-header"><span class="build-num">Build 01</span><h2 style="color:var(--poison-color)">독 빌드</h2><span class="diff-badge diff-easy">★☆☆ 입문</span></div>
+<div class="build-desc">가장 직관적이고 안정적인 빌드. 중독을 빠르게 쌓고 촉매(Catalyst)로 2배 뻥튀기. 보스전 특히 강력. 커뮤니티 추천 1순위 입문 빌드.</div>
+<div class="card-group-title">중독 쌓기</div><div class="card-list">
+<div class="card-item"><div class="card-name"><span style="color:var(--poison-color)">맹독</span> <span class="en">Deadly Poison</span> <span class="tag tag-poison">독</span></div><div class="card-desc">중독 5(강화 시 7). 1코에 독 공급 기본. <strong>강화 우선순위 높음</strong></div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--poison-color)">독 찌르기</span> <span class="en">Poisoned Stab</span> <span class="tag tag-poison">독</span></div><div class="card-desc">6뎀 + 중독 3. 딜+독 동시. Act 1 초반 픽으로 우수</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--poison-color)">뱀 물기</span> <span class="en">Snakebite</span> <span class="tag tag-poison">독</span></div><div class="card-desc">보존(Retain). 중독 7. 타이밍 유연하게 쓸 수 있는 강카</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--poison-color)">차오르는 독</span> <span class="en">Bubble Bubble</span> <span class="tag tag-poison">독</span></div><div class="card-desc">이미 독 걸린 적에 <strong>중독 9 추가</strong>. 독이 없으면 효과 없음 — 기존 독 필수</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--poison-color)">탄성 플라스크</span> <span class="en">Bouncing Flask</span> <span class="tag tag-poison">독</span></div><div class="card-desc">랜덤 적 중독 3 ×3. 다수 적 대응 가능한 독 AoE</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-orange)">유독 가스</span> <span class="en">Noxious Fumes</span> <span class="tag tag-power">파워</span></div><div class="card-desc">매 턴 <strong>전체 적 중독 2</strong>. 한 번 깔면 방어에만 집중 가능. 핵심 파워</div></div>
+</div>
+<div class="card-group-title">독 증폭 — 이게 진짜 딜</div><div class="card-list">
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-gold)">촉매</span> <span class="en">Catalyst</span> <span class="tag tag-rare">레어</span></div><div class="card-desc">적의 중독을 <strong>2배</strong>(강화 시 <strong>3배</strong>). 독 빌드의 진정한 핵심. <strong>반드시 찾아야 할 카드</strong></div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-gold)">폭주</span> <span class="en">Burst</span> <span class="tag tag-rare">레어</span></div><div class="card-desc">다음 스킬을 <strong>2회 사용</strong>. 폭주→촉매 = 독 4배(강화 촉매면 9배). 신급 콤보</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-gold)">촉진제</span> <span class="en">Accelerant</span> <span class="tag tag-power">파워</span></div><div class="card-desc"><strong>독 틱 1회 추가</strong>(강화 시 2회 추가). 독 20이면 한 턴 40~60뎀. 촉매와 양대 핵심</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-gold)">부식성 파도</span> <span class="en">Corrosive Wave</span> <span class="tag tag-rare">레어</span></div><div class="card-desc">이번 턴 카드 뽑을 때마다 <strong>전체 독 3</strong>. 드로우 엔진과 시너지</div></div>
+</div>
+<div class="card-group-title">방어 & 유틸</div><div class="card-list">
+<div class="card-item"><div class="card-name"><span style="color:var(--poison-color)">신기루</span> <span class="en">Mirage</span></div><div class="card-desc"><strong>전체 적 독 합산만큼 방어도</strong>. 소멸. 독 많이 쌓았을 때 거대한 방어</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-teal)">공중제비</span> <span class="en">Backflip</span></div><div class="card-desc">방어도 5 + 2장 드로우. 어떤 빌드든 필수급</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-teal)">다리 걸기</span> <span class="en">Leg Sweep</span></div><div class="card-desc">약화 2 + 방어도 11. Act 1 생존의 핵심</div></div>
+</div>
+<div class="combo-box"><div class="combo-title">킬 콤보: 폭주 → 촉매</div><ol>
+<li>유독 가스 + 맹독 등으로 독 10~15 쌓기</li>
+<li><strong>폭주(Burst)</strong> 사용</li>
+<li><strong>촉매(Catalyst)</strong> 사용 → 2번 발동 = 독 4배</li>
+<li>독 10 → 40, 독 15 → 60. 대부분의 보스를 녹임</li>
+</ol></div>
+<div class="warn-box"><strong>주의:</strong> 인공물(Artifact) 버프가 있는 적은 독 부여를 차단한다. 약화 등 싸구려 디버프로 인공물 먼저 벗기고 독을 걸어야 한다. 다수 적 AoE가 약한 편 — 아지랑이(Haze)나 탄성 플라스크로 보완.</div>
+<div class="relic-box"><div class="relic-title">추천 유물</div>
+<div class="relic-item"><strong>스네코 해골</strong> — 독 부여 시 추가 독 (사일런트 전용)</div>
+<div class="relic-item"><strong>종이 핰</strong> — 약화 적 피해 감소 25%→40% (범용)</div>
+</div></section>
+
+<!-- BUILD 2: SHIV -->
+<section class="build-section" id="build2"><div class="build-header"><span class="build-num">Build 02</span><h2 style="color:var(--shiv-color)">단도 빌드</h2><span class="diff-badge diff-mid">★★☆ 중급</span></div>
+<div class="build-desc">0코스트 단도를 대량 생성, 정밀(Accuracy)로 데미지 증폭. 한 턴 7~10장 연타의 쾌감. 유물 의존도가 높지만 폭발적.</div>
+<div class="card-group-title">단도 생성</div><div class="card-list">
+<div class="card-item"><div class="card-name"><span style="color:var(--shiv-color)">검무</span> <span class="en">Blade Dance</span> <span class="tag tag-shiv">단도</span></div><div class="card-desc">단도 3장. <strong>소멸</strong>. STS2에서 소멸이 붙어서 1회성이지만 기본 공급원</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--shiv-color)">망토와 단검</span> <span class="en">Cloak and Dagger</span> <span class="tag tag-shiv">단도</span></div><div class="card-desc">방어도 6 + 단도 1장. 공방 동시 해결</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--shiv-color)">숨겨진 단검</span> <span class="en">Hidden Daggers</span> <span class="tag tag-shiv">단도</span></div><div class="card-desc">카드 2장 버리고 단도 2장(강화 시 3장). <strong>교활 트리거 가능</strong> — 단도+Sly 브릿지 역할</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-orange)">무한의 검날</span> <span class="en">Infinite Blades</span> <span class="tag tag-power">파워</span></div><div class="card-desc">매 턴 단도 1장 자동 추가. <strong>강화하면 선천성(Innate)</strong> — 매 전투 1턴부터 보장</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--shiv-color)">선제 타격</span> <span class="en">Leading Strike</span></div><div class="card-desc">7뎀 + 단도 1장. 딜+단도 동시</div></div>
+</div>
+<div class="card-group-title">단도 강화 — 이게 없으면 단도는 쓰레기</div><div class="card-list">
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-orange)">정밀</span> <span class="en">Accuracy</span> <span class="tag tag-power">파워</span></div><div class="card-desc">단도 <strong>+4뎀</strong>. 4뎀→8뎀. <strong>이게 없으면 단도 빌드 자체가 성립 안 됨.</strong> 여러 장 환영</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-orange)">환영검</span> <span class="en">Phantom Blades</span> <span class="tag tag-power">파워</span></div><div class="card-desc">단도에 <strong>보존(Retain)</strong> 부여 + 매 턴 첫 단도 <strong>+9뎀</strong>. 단도가 사라지지 않고 남음</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-gold)">칼날 부채</span> <span class="en">Fan of Knives</span> <span class="tag tag-power">레어 파워</span></div><div class="card-desc"><strong>단도가 전체 공격</strong> + 단도 3장 추가. 사일런트 궁극의 AoE 해결사</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-gold)">칼날 함정</span> <span class="en">Knife Trap</span> <span class="tag tag-rare">레어</span></div><div class="card-desc">소멸 더미의 <strong>모든 단도 재사용</strong>. STS2에서 검무 소멸 → 칼날 함정으로 회수. 피니셔</div></div>
+</div>
+<div class="card-group-title">생존 — 단도 빌드의 약점 보완</div><div class="card-list">
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-orange)">잔상</span> <span class="en">Afterimage</span> <span class="tag tag-power">파워</span></div><div class="card-desc">카드 사용할 때마다 <strong>방어도 1</strong>. 단도 10장 = 방어도 10. <strong>단도 빌드 생존의 핵심</strong></div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-teal)">공중제비</span> <span class="en">Backflip</span></div><div class="card-desc">방어도 5 + 2장 드로우. 단도 빌드에서도 필수</div></div>
+</div>
+<div class="tip-box"><strong>핵심 포인트:</strong> 정밀(Accuracy) 없이 단도 빌드를 시작하지 마. 정밀이 뜨면 단도 빌드로 갈 신호, 안 뜨면 다른 빌드를 고려해야 한다. 잔상(Afterimage)은 거의 필수 — 없으면 방어가 심각하게 부족하다.</div>
+<div class="relic-box"><div class="relic-title">추천 유물</div>
+<div class="relic-item"><strong>손목 칼날</strong> — 0코스트 공격에 추가뎀. 정밀과 중복 효과</div>
+<div class="relic-item"><strong>수리검</strong> — 공격 3회마다 힘 +1. 단도 스팸과 시너지</div>
+<div class="relic-item"><strong>쿠나이</strong> — 공격 3회마다 민첩 +1. 방어 보완</div>
+<div class="relic-item"><strong>장식용 부채</strong> — 공격 3회마다 방어도 4. 단도 연타 시 자동 방어</div>
+<div class="relic-item"><strong>닌자 두루마리</strong> — 전투 시작 시 단도 3장</div>
+</div></section>
+
+<!-- BUILD 3: SLY DISCARD -->
+<section class="build-section" id="build3"><div class="build-header"><span class="build-num">Build 03</span><h2 style="color:var(--sly-color)">교활 버리기 엔진</h2><span class="diff-badge diff-hard">★★★ 고급</span></div>
+<div class="build-desc">STS2 신규 최강 빌드. 현재 얼리 액세스 기준 경험자들이 가장 높은 화력 천장으로 평가. 교활 카드는 버리면 자동 무료 사용 — 에너지가 사실상 무한.</div>
+<div class="card-group-title">교활 카드</div><div class="card-list">
+<div class="card-item"><div class="card-name"><span style="color:var(--sly-color)">범접 불가</span> <span class="en">Untouchable</span> <span class="tag tag-sly">교활</span></div><div class="card-desc">교활. 방어도 9. 버리면 공짜 방어</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--sly-color)">반사신경</span> <span class="en">Reflex</span> <span class="tag tag-sly">교활</span></div><div class="card-desc">교활. 2장 드로우. 추가 교활 카드를 뽑아서 연쇄 가능</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--sly-color)">전략가</span> <span class="en">Tactician</span> <span class="tag tag-sly">교활</span></div><div class="card-desc">교활. <strong>에너지 획득</strong>. 버려서 에너지 충전 + 남은 카드 플레이</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--sly-color)">아지랑이</span> <span class="en">Haze</span> <span class="tag tag-sly">교활</span></div><div class="card-desc">교활. <strong>전체 독 4</strong>. 독 빌드가 아니어도 AoE 독 살포 가능. 범용성 높음</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--sly-color)">재주넘기</span> <span class="en">Flick-Flack</span> <span class="tag tag-sly">교활</span></div><div class="card-desc">교활. 전체 7뎀. 교활 아니어도 초반 AoE로 쓸만</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--sly-color)">도탄</span> <span class="en">Ricochet</span> <span class="tag tag-sly">교활</span></div><div class="card-desc">교활. 랜덤 3뎀 ×4. 단일 대상에 강함</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-gold)">연마</span> <span class="en">Abrasive</span> <span class="tag tag-sly">레어 교활</span></div><div class="card-desc">교활. 민첩 +1 + 가시 4. 장기전 방어 + 반격</div></div>
+</div>
+<div class="card-group-title">대량 버리기 (트리거)</div><div class="card-list">
+<div class="card-item"><div class="card-name"><span style="color:var(--draw-color)">계산된 도박</span> <span class="en">Calculated Gamble</span></div><div class="card-desc"><strong>손 전체 버리고 같은 수 드로우</strong>. 교활 전부 한번에 발동. 빌드의 핵심 엔진</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--draw-color)">곡예</span> <span class="en">Acrobatics</span></div><div class="card-desc">3장 드로우 + 1장 버리기. 소규모 교활 트리거 + 패 순환</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--draw-color)">예비</span> <span class="en">Prepared</span></div><div class="card-desc">0코스트. 1장 드로우 + 1장 버리기. 에너지 없이 교활 트리거 가능</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-gold)">강철의 폭풍</span> <span class="en">Storm of Steel</span> <span class="tag tag-rare">레어</span></div><div class="card-desc"><strong>손 전체 버리기 → 버린 수만큼 단도</strong>. 교활 발동 + 단도 = 양쪽 시너지</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-gold)">설계의 대가</span> <span class="en">Master Planner</span> <span class="tag tag-power">레어 파워</span></div><div class="card-desc"><strong>스킬 사용 시 교활 부여</strong>. 모든 스킬이 버려지면 자동 재사용. 궁극 파워</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-orange)">작업 도구</span> <span class="en">Tools of the Trade</span> <span class="tag tag-power">파워</span></div><div class="card-desc">매 턴 1장 드로우 + 1장 버리기. 매 턴 교활 트리거 보장. 어떤 덱이든 유용</div></div>
+</div>
+<div class="combo-box"><div class="combo-title">이상적인 턴</div><ol>
+<li>손에 교활 3~4장 + <strong>계산된 도박</strong></li>
+<li>도박 사용 → 교활 전부 자동 발동 (방어+드로우+에너지+독+딜)</li>
+<li>새로 뽑은 카드로 추가 플레이</li>
+<li>에너지 0으로 6~8장 효과 발동. 에너지가 사실상 무의미</li>
+</ol></div>
+<div class="tip-box"><strong>덱 압축이 생명:</strong> 교활 카드가 손에 안 오면 빌드가 안 돌아간다. 타격/수비를 최대한 빨리 제거하고 덱을 얇게 유지해야 핵심 카드 순환이 빠르다. 생존자(Survivor) 시작 카드가 교활 트리거로 쓸 수 있어서 제거 후순위.</div>
+<div class="relic-box"><div class="relic-title">추천 유물</div>
+<div class="relic-item"><strong>팅샤</strong> — 카드 버릴 때마다 랜덤 적 3뎀. 교활 빌드 최고의 유물</div>
+<div class="relic-item"><strong>질긴 붕대</strong> — 카드 버릴 때마다 방어도 3. 버리기 = 방어</div>
+<div class="relic-item"><strong>쿠사리가마</strong> — 교활 카드가 사용될 때 트리거. 버리기 기반 유물 전부 시너지</div>
+</div></section>
+
+<!-- BUILD 4: DRAW -->
+<section class="build-section" id="build4"><div class="build-header"><span class="build-num">Build 04</span><h2 style="color:var(--draw-color)">드로우 연쇄</h2><span class="diff-badge diff-mid">★★☆ 중급</span></div>
+<div class="build-desc">카드를 대량으로 뽑아서 한 턴에 많이 사용. 스피드스터/구렁이의 형상 깔면 드로우·사용 자체가 딜. 독/단도/교활의 서브 엔진으로 활용하는 것이 가장 효과적.</div>
+<div class="card-group-title">핵심 카드</div><div class="card-list">
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-orange)">스피드스터</span> <span class="en">Speedster</span> <span class="tag tag-power">파워</span></div><div class="card-desc">카드 뽑을 때마다 <strong>전체 2뎀</strong>. 드로우가 곧 딜</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-gold)">구렁이의 형상</span> <span class="en">Serpent Form</span> <span class="tag tag-power">레어 파워</span></div><div class="card-desc">카드 사용마다 <strong>랜덤 적 4뎀</strong>. 단도/교활 다수 사용 시 폭발적</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--draw-color)">곡예</span> <span class="en">Acrobatics</span></div><div class="card-desc">3장 드로우 + 1장 버리기. 범용 드로우</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--draw-color)">공중제비</span> <span class="en">Backflip</span></div><div class="card-desc">방어도 5 + 2장 드로우. 공방 동시</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--draw-color)">전문성</span> <span class="en">Expertise</span></div><div class="card-desc">6장까지 드로우. 카드 많이 쓴 뒤 리필</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-gold)">살해</span> <span class="en">Murder</span> <span class="tag tag-rare">레어</span></div><div class="card-desc">1뎀 + <strong>전투 중 뽑은 카드 수만큼 추가뎀</strong>. 후반으로 갈수록 괴물</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--draw-color)">마무리</span> <span class="en">Finisher</span></div><div class="card-desc">이번 턴 쓴 공격 1장당 6뎀. 다수 카드 사용 후 피니시</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-gold)">불릿 타임</span> <span class="en">Bullet Time</span> <span class="tag tag-rare">레어</span></div><div class="card-desc">추가 드로우 불가, <strong>손 전체 0코스트</strong>. 보유 카드 전부 사용 가능</div></div>
+</div>
+<div class="warn-box"><strong>드로우 빌드 단독 운영 주의:</strong> 드로우만으로는 딜이 부족하다. 반드시 독/단도/교활 중 하나와 조합해야 의미가 있다. 스피드스터+구렁이의 형상이 엔진이고, 실제 딜은 다른 아키타입에서 나온다고 생각해.</div>
+<div class="relic-box"><div class="relic-title">추천 유물</div><div class="relic-item"><strong>추 (Pendulum)</strong> — 드로우 보조. 다만 교활 빌드에서는 과잉일 수 있음</div></div>
+</section>
+
+<!-- BUILD 5: HYBRID -->
+<section class="build-section" id="build5"><div class="build-header"><span class="build-num">Build 05</span><h2 style="background:linear-gradient(90deg,var(--poison-color),var(--shiv-color));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">독+단도 하이브리드</h2><span class="diff-badge diff-mid">★★☆ 중급</span></div>
+<div class="build-desc">독 바르기(Envenom)로 단도 공격마다 독 자동 부여. 발병(Outbreak)까지 깔면 독 3번당 전체 11뎀. 단도 빌드가 돌아갈 때 독 바르기가 뜨면 고려.</div>
+<div class="card-group-title">핵심 콤보</div><div class="card-list">
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-gold)">독 바르기</span> <span class="en">Envenom</span> <span class="tag tag-power">레어 파워</span></div><div class="card-desc">막히지 않은 피해마다 <strong>독 1</strong>. 단도 연타 시 자동 독 살포</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-orange)">발병</span> <span class="en">Outbreak</span> <span class="tag tag-power">파워</span></div><div class="card-desc">독 3번 부여마다 <strong>전체 11뎀</strong>. 단도로 독 3번 → 11뎀 자동 트리거</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-orange)">정밀</span> <span class="en">Accuracy</span> <span class="tag tag-power">파워</span></div><div class="card-desc">단도 +4뎀. 단도 자체 딜도 올림</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-gold)">촉진제</span> <span class="en">Accelerant</span> <span class="tag tag-power">파워</span></div><div class="card-desc">독 추가 틱. 쌓인 독 활용 극대화</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-gold)">칼날 부채</span> <span class="en">Fan of Knives</span> <span class="tag tag-power">레어</span></div><div class="card-desc">단도 전체 공격 + 3장. 독 바르기 + 전체 공격 = 전체 독 살포</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--shiv-color)">검무</span> <span class="en">Blade Dance</span></div><div class="card-desc">단도 3장. 독 바르기 있으면 자동 독 3</div></div>
+</div>
+<div class="warn-box"><strong>주의:</strong> 독 바르기(Envenom)는 2~3코스트로 비싸다. 커뮤니티에서는 독 바르기를 처음부터 노리기보다, <strong>이미 단도 빌드가 돌아가는 상태에서 뜨면 시너지로 추가</strong>하는 것을 권장한다. 초반부터 독+단도 양쪽을 동시에 모으면 덱이 꼬일 확률이 높다.</div>
+</section>
+
+<!-- BUILD 6: SHADOW BURST -->
+<section class="build-section" id="build6"><div class="build-header"><span class="build-num">Build 06</span><h2 style="color:var(--accent-purple)">그림자 폭발</h2><span class="diff-badge diff-hard">★★★ 고급 (실험적)</span></div>
+<div class="build-desc">그림자 걸음(다음 턴 공격 2배) → 잉크 칼날(공격마다 힘+2) → 단도 연타. 원턴킬 노리는 로망 빌드. 레어 카드 의존도 극높음.</div>
+<div class="card-group-title">핵심 카드</div><div class="card-list">
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-purple)">그림자 걸음</span> <span class="en">Shadow Step</span> <span class="tag tag-rare">레어</span></div><div class="card-desc">손 버리기 + <strong>다음 턴 공격 2배</strong>. 교활도 트리거. 셋업 카드</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-purple)">잉크 칼날</span> <span class="en">Blade of Ink</span> <span class="tag tag-rare">레어</span></div><div class="card-desc">이번 턴 공격마다 <strong>힘 +2 (이번 턴만)</strong>. 단도 연타 시 힘 폭발</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-gold)">대단원의 막</span> <span class="en">Grand Finale</span> <span class="tag tag-rare">레어</span></div><div class="card-desc">뽑을 더미 0장일 때 <strong>전체 50뎀</strong>. 2배 턴에 100뎀. 조건부 초고뎀</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-purple)">꼬챙이</span> <span class="en">Skewer</span></div><div class="card-desc">7뎀 ×X (에너지 전부 소모). 힘+2배 적용 시 폭딜</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-purple)">그림자 은신</span> <span class="en">Shadowmeld</span> <span class="tag tag-rare">레어</span></div><div class="card-desc"><strong>방어도 획득 2배</strong>. 셋업 턴 방어용</div></div>
+<div class="card-item"><div class="card-name"><span style="color:var(--accent-gold)">암살</span> <span class="en">Assassinate</span> <span class="tag tag-rare">레어</span></div><div class="card-desc">선천성. 10뎀+취약 1. 소멸. 2배 턴에 20뎀으로 시작</div></div>
+</div>
+<div class="combo-box"><div class="combo-title">2턴 킬 콤보</div><ol>
+<li>1턴: <strong>그림자 걸음</strong> (교활 트리거+방어)</li>
+<li>2턴: <strong>잉크 칼날</strong> → 단도 5장 연타 (공격마다 힘+2, 전부 2배)</li>
+<li>마지막 단도 (4+4+10)×2 = 36뎀</li>
+<li><strong>꼬챙이/대단원의 막</strong>으로 피니시</li>
+</ol></div>
+<div class="warn-box"><strong>실험적 빌드:</strong> 레어 카드 3장 이상이 맞물려야 돌아가는 로망 빌드. 커뮤니티에서 검증된 메인 아키타입이 아니므로, 독/단도/교활이 안 풀릴 때 레어가 운 좋게 뜨면 고려하는 수준.</div>
+</section>
+
+<!-- COLORLESS -->
+<section class="colorless-section" id="colorless"><h2 style="color:#b0b0c0">범용 무색 카드 추천</h2><div class="section-desc">상점/이벤트에서 보면 챙길 것들. STS2 얼리 액세스 기준.</div><div class="card-list">
+<div class="card-item"><div class="card-name"><span style="color:#b0b0c0">위풍당당</span> <span class="en">Panache</span> <span class="tag tag-colorless">파워</span></div><div class="card-desc">카드 5장마다 전체 10뎀. <strong>단도/교활에서 자연 달성</strong>. 다수 카드 사용 빌드 최고 무색카드</div></div>
+<div class="card-item"><div class="card-name"><span style="color:#b0b0c0">어둠의 족쇄</span> <span class="en">Dark Shackles</span> <span class="tag tag-colorless">고급</span></div><div class="card-desc">0코 적 힘 감소. 소멸. 엘리트/보스 피해 축소용</div></div>
+<div class="card-item"><div class="card-name"><span style="color:#b0b0c0">순수</span> <span class="en">Purity</span> <span class="tag tag-colorless">고급</span></div><div class="card-desc">손에서 카드 제거(소멸). 덱 압축 보조 — 사일런트에 특히 가치 높음</div></div>
+<div class="card-item"><div class="card-name"><span style="color:#b0b0c0">가학적 본성</span> <span class="en">Sadistic Nature</span> <span class="tag tag-colorless">레어</span></div><div class="card-desc">디버프 부여마다 피해. 독/약화 빌드에서 폭발적 — 독 바르기와 극상성</div></div>
+<div class="card-item"><div class="card-name"><span style="color:#b0b0c0">신성</span> <span class="en">Apotheosis</span> <span class="tag tag-colorless">레어</span></div><div class="card-desc">전체 덱 강화. 비싸지만 <strong>한 방에 모든 카드 업그레이드</strong>. 여유 있으면 반드시 고려</div></div>
+</div></section>
+
+<!-- TIPS -->
+<section class="tips-section" id="tips"><h2>운영 팁 & 주의사항</h2>
+<div class="tip-item"><span class="tip-num">1</span> <strong>체력 회복이 없다.</strong> 70 HP에 힐 제로. 모든 피해가 영구 손실. Act 1에서 약화(Weak) 부여와 방어 카드 확보가 최우선. 공격보다 생존이 먼저다.</div>
+<div class="tip-item"><span class="tip-num">2</span> <strong>공중제비는 만능.</strong> 방어도+드로우. 어떤 빌드든 2장은 넣어. 강화 우선순위도 높다.</div>
+<div class="tip-item"><span class="tip-num">3</span> <strong>뱀의 반지로 1턴이 강하다.</strong> 첫 턴 7장. 선천성 카드(암살 등)와 시너지. 이 우위를 살려서 파워 카드를 1턴에 깔아야 한다.</div>
+<div class="tip-item"><span class="tip-num">4</span> <strong>독과 단도를 무작정 섞지 마.</strong> 독 바르기(Envenom) 없이 독+단도를 섞으면 둘 다 애매해진다. 빌드 방향을 정하고 가되, 주어진 카드에 유연하게 대응해라.</div>
+<div class="tip-item"><span class="tip-num">5</span> <strong>교활 카드는 직접 쓰면 비효율.</strong> 2~3코 내고 정식 사용하면 손해. 반드시 버리기로 트리거해서 공짜로 발동시켜야 한다.</div>
+<div class="tip-item"><span class="tip-num">6</span> <strong>덱 압축이 생명.</strong> 타격/수비 제거 최우선. 덱이 두꺼우면 핵심 콤보가 안 돌아온다. 카드를 집을 때 "이 카드가 덱을 꼬이게 하진 않나?" 항상 자문해라.</div>
+<div class="tip-item"><span class="tip-num">7</span> <strong>포션 관리가 생존을 좌우한다.</strong> 체력 회복이 없으므로 포션을 엘리트/보스에 아껴써야 한다. 일반 전투에서 포션 낭비하면 후반에 죽는다.</div>
+<div class="tip-item"><span class="tip-num">8</span> <strong>인공물(Artifact) 주의.</strong> 인공물이 있는 적에게 독/약화가 안 걸린다. 싸구려 디버프로 인공물 먼저 벗기고 핵심 디버프를 걸어라.</div>
+<div class="tip-item"><span class="tip-num">9</span> <strong>유물 하나로 이기려 하지 마.</strong> 팅샤, 질긴 붕대, 해시계를 제외하면 유물 하나만으로는 게임을 못 이긴다. 카드 시너지가 우선, 유물은 보너스.</div>
+<div class="tip-item"><span class="tip-num">10</span> <strong>STS2는 3에너지 기반.</strong> STS1보다 에너지가 적다. 0코스트 카드(단도, 예비 등)와 에너지 효율 좋은 카드의 가치가 더 올라갔다.</div>
+</section>
+
+<footer>Slay the Spire 2 (Early Access, 2026.03) — Silent Deck Building Guide<br>Built with 🐍 by a fellow Spire climber</footer>
+</div>
+
+<nav class="side-nav" id="sideNav">
+<a href="#concepts" data-section="concepts"><span class="nav-icon">📖</span><span class="nav-label">기본 개념</span><span class="nav-dot"></span></a>
+<a href="#philosophy" data-section="philosophy"><span class="nav-icon">⚠️</span><span class="nav-label">본질</span><span class="nav-dot"></span></a>
+<a href="#build1" data-section="build1"><span class="nav-icon">🧪</span><span class="nav-label">독 빌드</span><span class="nav-dot"></span></a>
+<a href="#build2" data-section="build2"><span class="nav-icon">🗡️</span><span class="nav-label">단도 빌드</span><span class="nav-dot"></span></a>
+<a href="#build3" data-section="build3"><span class="nav-icon">💨</span><span class="nav-label">교활 버리기</span><span class="nav-dot"></span></a>
+<a href="#build4" data-section="build4"><span class="nav-icon">🃏</span><span class="nav-label">드로우 연쇄</span><span class="nav-dot"></span></a>
+<a href="#build5" data-section="build5"><span class="nav-icon">🐍</span><span class="nav-label">독+단도</span><span class="nav-dot"></span></a>
+<a href="#build6" data-section="build6"><span class="nav-icon">⚡</span><span class="nav-label">그림자 폭발</span><span class="nav-dot"></span></a>
+<a href="#colorless" data-section="colorless"><span class="nav-icon">🃏</span><span class="nav-label">무색 카드</span><span class="nav-dot"></span></a>
+<a href="#tips" data-section="tips"><span class="nav-icon">💡</span><span class="nav-label">운영 팁</span><span class="nav-dot"></span></a>
+</nav>
+
+<script>
+(function(){const n=document.querySelectorAll('.side-nav a[data-section]'),s=[];n.forEach(l=>{const i=l.getAttribute('data-section'),e=document.getElementById(i);if(e)s.push({id:i,el:e,link:l})});n.forEach(l=>{l.addEventListener('click',e=>{e.preventDefault();const i=l.getAttribute('data-section'),t=document.getElementById(i);if(t){t.scrollIntoView({behavior:'smooth',block:'start'});history.replaceState(null,'','#'+i)}})});let t=false;function u(){const y=window.scrollY+120;let c=s[0];for(const x of s){if(x.el.offsetTop<=y)c=x}n.forEach(l=>l.classList.remove('active'));if(c)c.link.classList.add('active');t=false}window.addEventListener('scroll',()=>{if(!t){requestAnimationFrame(u);t=true}});u()})();
+</script>
+</body>
+</html>
